@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chord Fluency Piano</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🎹</text></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🎹 Chord Fluency Piano</div>
+  <div class="midi-controls">
+    <button id="midiConnect" class="primary">Connect MIDI</button>
+    <label>Input <select id="midiInput"><option value="">— none —</option></select></label>
+    <label>Output <select id="midiOutput"><option value="">Built-in synth</option></select></label>
+    <label title="Only listen to one MIDI channel (CVP parts can send on several channels)">Ch <select id="midiChannel"><option value="0">all</option></select></label>
+    <label title="Play incoming MIDI through the built-in synth (off by default: the CVP makes its own sound)"><input type="checkbox" id="monitorMidi"> hear MIDI in app</label>
+    <label>Vol <input type="range" id="volume" min="0" max="1" step="0.05" value="0.6"></label>
+    <span id="midiStatus" class="status">MIDI not connected</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="practice" class="active">Play-along</button>
+  <button data-tab="library">Library &amp; Editor</button>
+  <button data-tab="trainer">Chord Trainer</button>
+  <button data-tab="help">Help</button>
+</nav>
+
+<main>
+<!-- ================= PRACTICE ================= -->
+<section id="tab-practice" class="tab active">
+  <div class="panel controls">
+    <div class="row">
+      <label>Song <select id="pSong"></select></label>
+      <label>Arrangement <select id="pArrSource">
+        <option value="generated">Generated</option>
+        <option value="own">Song's own left hand</option>
+      </select></label>
+      <label>Style <select id="pStyle"></select></label>
+      <label>LH pattern <select id="pPattern"></select></label>
+      <label title="Add chord tones under the melody in the right hand"><input type="checkbox" id="pFill" checked> RH chord fills</label>
+      <button id="pSaveArr" title="Store this generated arrangement inside the song">Save arrangement to song</button>
+    </div>
+    <div class="row">
+      <label>Practise <select id="pHands"></select></label>
+      <label title="Practise the melody alone instead of the arranged right hand"><input type="checkbox" id="pMelodyOnly"> RH = melody only</label>
+      <label>Mode <select id="pMode">
+        <option value="wait">Wait for me</option>
+        <option value="steady">Steady tempo (scored)</option>
+      </select></label>
+      <label>Tempo <input type="number" id="pTempo" min="20" max="240" value="80" class="num"> bpm</label>
+      <label><input type="checkbox" id="pMetro" checked> metronome</label>
+      <label>Count-in <select id="pCountIn"><option>0</option><option selected>1</option><option>2</option></select> bars</label>
+      <label title="Play the hand you're not practising"><input type="checkbox" id="pAuto" checked> play other hand</label>
+      <label><input type="checkbox" id="pHints" checked> keyboard hints</label>
+    </div>
+    <div class="row">
+      <label>Bars <input type="number" id="pFrom" min="0" value="" placeholder="start" class="num" title="Bar number (0 = pickup bar)"> to <input type="number" id="pTo" min="1" value="" placeholder="end" class="num"></label>
+      <label><input type="checkbox" id="pLoop"> loop</label>
+      <button id="pStart" class="primary">▶ Start</button>
+      <button id="pStop">■ Stop</button>
+      <button id="pListen" title="Hear the arrangement">🔊 Listen</button>
+      <span class="hint">Tip: click a bar in the score to start from there.</span>
+    </div>
+  </div>
+  <div class="panel result" id="pStatus">Choose a song and press Start. In “wait for me” mode the music only moves on when you play the right notes.</div>
+  <div class="panel scorewrap" id="pScore"></div>
+</section>
+
+<!-- ================= LIBRARY & EDITOR ================= -->
+<section id="tab-library" class="tab">
+  <div class="libgrid">
+    <div class="panel songlist">
+      <input type="search" id="libSearch" placeholder="Search songs…">
+      <ul id="libList"></ul>
+      <div class="btns">
+        <button id="libNew">New</button>
+        <button id="libDup">Duplicate</button>
+        <button id="libDel" class="danger">Delete</button>
+      </div>
+      <div class="btns">
+        <label class="filebtn">Import JSON…<input type="file" id="libImport" accept=".json,application/json" multiple hidden></label>
+        <button id="libPaste">Paste JSON</button>
+      </div>
+      <div class="btns">
+        <button id="libExport">Export song</button>
+        <button id="libExportAll">Export all</button>
+      </div>
+      <div class="btns">
+        <button id="libSeeds">Restore examples</button>
+        <button id="libPrompt" title="Copy instructions you can give to an AI assistant along with sheet music">Copy AI prompt</button>
+      </div>
+      <p class="small" id="libInfo"></p>
+    </div>
+    <div class="panel editor">
+      <div class="row">
+        <label class="grow">Title <input id="eTitle"></label>
+        <label class="grow">Composer <input id="eComposer"></label>
+      </div>
+      <div class="row">
+        <label>Key <input id="eKey" class="num" value="C" title="e.g. C, G, Eb, F#m, Dm"></label>
+        <label>Time <input id="eTime" class="num" value="4/4"></label>
+        <label>Tempo <input id="eTempo" type="number" class="num" value="90"></label>
+        <label title="Beats (quarter notes) before the first full bar">Pickup beats <input id="ePickup" type="number" class="num" value="0" step="0.25" min="0"></label>
+        <label><input type="checkbox" id="ePlaceholder"> placeholder</label>
+        <label class="grow">Source / notes <input id="eSource"></label>
+      </div>
+      <div class="row steprow">
+        <strong>Step entry:</strong>
+        <label><input type="checkbox" id="sOn"> from MIDI / on-screen keys</label>
+        <label>into <select id="sTarget"><option value="melody">Melody</option><option value="chords">Chords (detected)</option><option value="lh">Left hand</option><option value="rh">Full right hand</option></select></label>
+        <span class="durbtns" id="sDur">
+          <button data-d="4">whole</button><button data-d="2">half</button><button data-d="1" class="active">quarter</button><button data-d="0.5">8th</button><button data-d="0.25">16th</button>
+        </span>
+        <label><input type="checkbox" id="sDot"> dotted</label>
+        <label><input type="checkbox" id="sAutoBar" checked> auto bar lines</label>
+        <button id="sRest">rest</button><button id="sBar">|</button><button id="sUndo">⌫ undo</button>
+      </div>
+      <label class="block">Melody (right hand) <span class="small">— tokens like <code>G4:1</code>, <code>B4:e</code>, <code>E4+G4:h</code>, <code>r:q</code>, bars <code>|</code></span>
+        <textarea id="eMelody" rows="4" spellcheck="false"></textarea></label>
+      <label class="block">Chords <span class="small">— <code>| G | G7 | C G/B | Am:2 D7:1 | N.C. |</code> (chords without a length share the bar)</span>
+        <textarea id="eChords" rows="3" spellcheck="false"></textarea></label>
+      <details id="eArrDetails">
+        <summary>Optional written arrangement (left hand / full right hand)</summary>
+        <label class="block">Left hand <textarea id="eLH" rows="3" spellcheck="false" placeholder="e.g. | C3+E3+G3:4 | G2+D3+G3:2 C3+E3+G3:2 |"></textarea></label>
+        <label class="block">Full right hand (melody + harmony; overrides melody when practising the right hand) <textarea id="eRH" rows="3" spellcheck="false"></textarea></label>
+      </details>
+      <div class="row">
+        <button id="eSave" class="primary">💾 Save</button>
+        <button id="eRevert">Revert</button>
+        <button id="ePractice">Practise this song →</button>
+        <button id="eShowJson">Show / edit JSON</button>
+        <span id="eMsg" class="small"></span>
+      </div>
+      <div id="eJsonWrap" hidden>
+        <textarea id="eJson" rows="14" spellcheck="false"></textarea>
+        <div class="row"><button id="eApplyJson">Apply JSON to editor</button></div>
+      </div>
+      <div id="eProblems" class="problems"></div>
+      <div class="scorewrap" id="eScore"></div>
+    </div>
+  </div>
+  <dialog id="pasteDlg">
+    <form method="dialog">
+      <h3>Paste song JSON</h3>
+      <p class="small">A single song, an array of songs, or an exported bundle.</p>
+      <textarea id="pasteText" rows="16" spellcheck="false"></textarea>
+      <div class="row"><button value="ok" class="primary">Import</button><button value="cancel">Cancel</button></div>
+    </form>
+  </dialog>
+</section>
+
+<!-- ================= TRAINER ================= -->
+<section id="tab-trainer" class="tab">
+  <div class="panel controls">
+    <div class="row">
+      <label>Drill <select id="tDrill"><option value="chords">Chords &amp; inversions</option><option value="progression">Progressions in all keys</option></select></label>
+      <label id="tProgWrap" hidden>Progression <select id="tProg"></select></label>
+      <label>Order <select id="tOrder"><option value="random">Random</option><option value="circle">Circle of fifths</option><option value="chromatic">Chromatic</option></select></label>
+      <label><input type="checkbox" id="tReqInv" checked> exact inversion (lowest note)</label>
+      <label><input type="checkbox" id="tHint"> show notes</label>
+      <label><input type="checkbox" id="tTimed"> 5-second limit</label>
+    </div>
+    <div class="row" id="tRootsRow"><strong>Keys/roots:</strong> <span id="tRoots" class="chips"></span> <button id="tAllRoots" class="small">all</button><button id="tNoRoots" class="small">none</button></div>
+    <div class="row" id="tQualRow"><strong>Chord types:</strong> <span id="tQuals" class="chips"></span></div>
+    <div class="row" id="tInvRow"><strong>Inversions:</strong> <span id="tInvs" class="chips"></span></div>
+    <div class="row">
+      <button id="tStart" class="primary">▶ Start drill</button>
+      <button id="tSkip">Skip</button>
+      <button id="tStop">■ Stop</button>
+      <button id="tResetStats" class="danger small">Reset stats</button>
+    </div>
+  </div>
+  <div class="panel trainer-display">
+    <div id="tContext" class="small"></div>
+    <div id="tTarget" class="bigtarget">Press Start</div>
+    <div id="tSymbol" class="symbol"></div>
+    <div id="tTones" class="small"></div>
+    <div id="tFeedback" class="feedback"></div>
+    <div id="tProgress" class="small"></div>
+  </div>
+  <div class="panel"><h3>Your chord stats</h3><div id="tStats" class="stats"></div></div>
+</section>
+
+<!-- ================= HELP ================= -->
+<section id="tab-help" class="tab">
+  <div class="panel prose">
+    <h2>Getting started</h2>
+    <ol>
+      <li>Connect the Yamaha CVP's <b>USB TO HOST</b> port (or a USB-MIDI adapter on its MIDI OUT) to the computer/phone. Use <b>Chrome or Edge</b> on Windows, or <b>Chrome on Android</b> (USB-OTG adapter).</li>
+      <li>Click <b>Connect MIDI</b>, allow access, then choose the input. If you hear doubled notes or the CVP's style accompaniment confuses the app, set <b>Ch</b> to channel 1.</li>
+      <li>No piano handy? Click the on-screen keys, or use the computer keyboard: <code>Z S X D C V…</code> = C3 upwards, <code>Q 2 W 3 E R…</code> = C4 upwards.</li>
+    </ol>
+    <h2>Play-along</h2>
+    <p><b>Wait for me</b> stops on each note/chord until you play it. <b>Steady tempo</b> runs with a metronome and scores timing (perfect ≤60 ms, good ≤120 ms) and accuracy.
+      <b>Melody + chord symbols</b> is the chord-fluency mode: read the melody with your right hand and play the chord named above the staff with your left hand in <i>any</i> voicing or inversion.</p>
+    <h2>Arrangements</h2>
+    <p>Pick a style (pop ballad, ragtime stride, gospel/hymn, country) and a left-hand pattern (block, broken, stride). The generator builds both hands from the melody and chord symbols. Save it into the song if you like it.</p>
+    <h2>Getting songs in</h2>
+    <p>Type them in the editor, enter them note by note from the piano (step entry), or give sheet music to an AI assistant along with the prompt from <b>Copy AI prompt</b>, then import the JSON it writes. The format is documented in <code>README.md</code>.</p>
+    <p class="small">Your library is stored in this browser (IndexedDB). Export regularly to keep a backup.</p>
+  </div>
+</section>
+</main>
+
+<footer class="live">
+  <div class="livebar">
+    <div class="livechord"><div id="liveChord" class="chordname">—</div><div id="liveInv" class="small"></div><div id="liveAlt" class="small"></div></div>
+    <div id="liveStaff" class="livestaff"></div>
+    <div class="livenotes"><div id="liveNotes" class="small"></div><div id="livePedal" class="small"></div>
+      <button id="kbToggle" class="small" title="Hide/show the on-screen keyboard">hide keys</button> <label class="small">Keys <select id="kbRange"><option value="88">88 (full)</option><option value="61" selected>61 (C2–C7)</option><option value="49">49 (C2–C6)</option></select></label></div>
+  </div>
+  <div id="keyboard" class="keyboard"></div>
+</footer>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

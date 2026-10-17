@@ -1,0 +1,317 @@
+{
+ "format": "piano-song",
+ "version": 1,
+ "id": "seed-ode-to-joy",
+ "title": "Ode to Joy (simple placeholder, with left hand)",
+ "composer": "Ludwig van Beethoven (public domain)",
+ "source": "Simplified placeholder; includes a hand-written block-chord left hand as an example arrangement",
+ "placeholder": true,
+ "key": "C",
+ "timeSignature": "4/4",
+ "tempo": 96,
+ "pickupBeats": 0,
+ "tags": [
+  "classical",
+  "placeholder",
+  "beginner"
+ ],
+ "melody": [
+  {
+   "beat": 0,
+   "dur": 1,
+   "pitch": "E4"
+  },
+  {
+   "beat": 1,
+   "dur": 1,
+   "pitch": "E4"
+  },
+  {
+   "beat": 2,
+   "dur": 1,
+   "pitch": "F4"
+  },
+  {
+   "beat": 3,
+   "dur": 1,
+   "pitch": "G4"
+  },
+  {
+   "beat": 4,
+   "dur": 1,
+   "pitch": "G4"
+  },
+  {
+   "beat": 5,
+   "dur": 1,
+   "pitch": "F4"
+  },
+  {
+   "beat": 6,
+   "dur": 1,
+   "pitch": "E4"
+  },
+  {
+   "beat": 7,
+   "dur": 1,
+   "pitch": "D4"
+  },
+  {
+   "beat": 8,
+   "dur": 1,
+   "pitch": "C4"
+  },
+  {
+   "beat": 9,
+   "dur": 1,
+   "pitch": "C4"
+  },
+  {
+   "beat": 10,
+   "dur": 1,
+   "pitch": "D4"
+  },
+  {
+   "beat": 11,
+   "dur": 1,
+   "pitch": "E4"
+  },
+  {
+   "beat": 12,
+   "dur": 1.5,
+   "pitch": "E4"
+  },
+  {
+   "beat": 13.5,
+   "dur": 0.5,
+   "pitch": "D4"
+  },
+  {
+   "beat": 14,
+   "dur": 2,
+   "pitch": "D4"
+  },
+  {
+   "beat": 16,
+   "dur": 1,
+   "pitch": "E4"
+  },
+  {
+   "beat": 17,
+   "dur": 1,
+   "pitch": "E4"
+  },
+  {
+   "beat": 18,
+   "dur": 1,
+   "pitch": "F4"
+  },
+  {
+   "beat": 19,
+   "dur": 1,
+   "pitch": "G4"
+  },
+  {
+   "beat": 20,
+   "dur": 1,
+   "pitch": "G4"
+  },
+  {
+   "beat": 21,
+   "dur": 1,
+   "pitch": "F4"
+  },
+  {
+   "beat": 22,
+   "dur": 1,
+   "pitch": "E4"
+  },
+  {
+   "beat": 23,
+   "dur": 1,
+   "pitch": "D4"
+  },
+  {
+   "beat": 24,
+   "dur": 1,
+   "pitch": "C4"
+  },
+  {
+   "beat": 25,
+   "dur": 1,
+   "pitch": "C4"
+  },
+  {
+   "beat": 26,
+   "dur": 1,
+   "pitch": "D4"
+  },
+  {
+   "beat": 27,
+   "dur": 1,
+   "pitch": "E4"
+  },
+  {
+   "beat": 28,
+   "dur": 1.5,
+   "pitch": "D4"
+  },
+  {
+   "beat": 29.5,
+   "dur": 0.5,
+   "pitch": "C4"
+  },
+  {
+   "beat": 30,
+   "dur": 2,
+   "pitch": "C4"
+  }
+ ],
+ "chords": [
+  {
+   "beat": 0,
+   "dur": 4,
+   "symbol": "C"
+  },
+  {
+   "beat": 4,
+   "dur": 4,
+   "symbol": "G"
+  },
+  {
+   "beat": 8,
+   "dur": 4,
+   "symbol": "C"
+  },
+  {
+   "beat": 12,
+   "dur": 4,
+   "symbol": "G"
+  },
+  {
+   "beat": 16,
+   "dur": 4,
+   "symbol": "C"
+  },
+  {
+   "beat": 20,
+   "dur": 4,
+   "symbol": "G"
+  },
+  {
+   "beat": 24,
+   "dur": 2,
+   "symbol": "C"
+  },
+  {
+   "beat": 26,
+   "dur": 2,
+   "symbol": "G"
+  },
+  {
+   "beat": 28,
+   "dur": 2,
+   "symbol": "G"
+  },
+  {
+   "beat": 30,
+   "dur": 2,
+   "symbol": "C"
+  }
+ ],
+ "arrangement": {
+  "style": "manual",
+  "leftHand": [
+   {
+    "beat": 0,
+    "dur": 4,
+    "pitches": [
+     "C3",
+     "E3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 4,
+    "dur": 4,
+    "pitches": [
+     "B2",
+     "D3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 8,
+    "dur": 4,
+    "pitches": [
+     "C3",
+     "E3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 12,
+    "dur": 4,
+    "pitches": [
+     "B2",
+     "D3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 16,
+    "dur": 4,
+    "pitches": [
+     "C3",
+     "E3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 20,
+    "dur": 4,
+    "pitches": [
+     "B2",
+     "D3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 24,
+    "dur": 2,
+    "pitches": [
+     "C3",
+     "E3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 26,
+    "dur": 2,
+    "pitches": [
+     "B2",
+     "D3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 28,
+    "dur": 2,
+    "pitches": [
+     "B2",
+     "D3",
+     "G3"
+    ]
+   },
+   {
+    "beat": 30,
+    "dur": 2,
+    "pitches": [
+     "C3",
+     "E3",
+     "G3"
+    ]
+   }
+  ]
+ }
+}

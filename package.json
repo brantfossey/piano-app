@@ -1,0 +1,10 @@
+{
+  "name": "chord-fluency-piano",
+  "private": true,
+  "type": "module",
+  "description": "Static browser app: Web MIDI play-along, chord detection, arrangement generator, chord trainer. No build step.",
+  "scripts": {
+    "test": "node --test tests/",
+    "serve": "python3 -m http.server 8080"
+  }
+}

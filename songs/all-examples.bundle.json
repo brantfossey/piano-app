@@ -1,0 +1,1303 @@
+{
+ "format": "piano-song-bundle",
+ "version": 1,
+ "exported": "2026-10-17T03:14:57.156Z",
+ "songs": [
+  {
+   "format": "piano-song",
+   "version": 1,
+   "id": "seed-amazing-grace",
+   "title": "Amazing Grace (simple placeholder)",
+   "composer": "Traditional (tune \"New Britain\"), public domain",
+   "source": "Simplified placeholder melody typed from memory — verify against real sheet music",
+   "placeholder": true,
+   "key": "G",
+   "timeSignature": "3/4",
+   "tempo": 72,
+   "pickupBeats": 1,
+   "tags": [
+    "hymn",
+    "placeholder"
+   ],
+   "melody": [
+    {
+     "beat": 0,
+     "dur": 1,
+     "pitch": "D4",
+     "lyric": "A-"
+    },
+    {
+     "beat": 1,
+     "dur": 2,
+     "pitch": "G4",
+     "lyric": "ma-"
+    },
+    {
+     "beat": 3,
+     "dur": 0.5,
+     "pitch": "B4",
+     "lyric": "zing"
+    },
+    {
+     "beat": 3.5,
+     "dur": 0.5,
+     "pitch": "G4"
+    },
+    {
+     "beat": 4,
+     "dur": 2,
+     "pitch": "B4",
+     "lyric": "grace"
+    },
+    {
+     "beat": 6,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "how"
+    },
+    {
+     "beat": 7,
+     "dur": 2,
+     "pitch": "G4",
+     "lyric": "sweet"
+    },
+    {
+     "beat": 9,
+     "dur": 1,
+     "pitch": "E4",
+     "lyric": "the"
+    },
+    {
+     "beat": 10,
+     "dur": 2,
+     "pitch": "D4",
+     "lyric": "sound"
+    },
+    {
+     "beat": 12,
+     "dur": 1,
+     "pitch": "D4",
+     "lyric": "that"
+    },
+    {
+     "beat": 13,
+     "dur": 2,
+     "pitch": "G4",
+     "lyric": "saved"
+    },
+    {
+     "beat": 15,
+     "dur": 0.5,
+     "pitch": "B4",
+     "lyric": "a"
+    },
+    {
+     "beat": 15.5,
+     "dur": 0.5,
+     "pitch": "G4"
+    },
+    {
+     "beat": 16,
+     "dur": 2,
+     "pitch": "B4",
+     "lyric": "wretch"
+    },
+    {
+     "beat": 18,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "like"
+    },
+    {
+     "beat": 19,
+     "dur": 3,
+     "pitch": "D5",
+     "lyric": "me"
+    },
+    {
+     "beat": 22,
+     "dur": 2,
+     "pitch": "D5"
+    },
+    {
+     "beat": 24,
+     "dur": 1,
+     "pitch": "B4",
+     "lyric": "I"
+    },
+    {
+     "beat": 25,
+     "dur": 2,
+     "pitch": "D5",
+     "lyric": "once"
+    },
+    {
+     "beat": 27,
+     "dur": 0.5,
+     "pitch": "B4",
+     "lyric": "was"
+    },
+    {
+     "beat": 27.5,
+     "dur": 0.5,
+     "pitch": "G4"
+    },
+    {
+     "beat": 28,
+     "dur": 2,
+     "pitch": "B4",
+     "lyric": "lost"
+    },
+    {
+     "beat": 30,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "but"
+    },
+    {
+     "beat": 31,
+     "dur": 2,
+     "pitch": "G4",
+     "lyric": "now"
+    },
+    {
+     "beat": 33,
+     "dur": 1,
+     "pitch": "E4",
+     "lyric": "am"
+    },
+    {
+     "beat": 34,
+     "dur": 2,
+     "pitch": "D4",
+     "lyric": "found"
+    },
+    {
+     "beat": 36,
+     "dur": 1,
+     "pitch": "D4",
+     "lyric": "was"
+    },
+    {
+     "beat": 37,
+     "dur": 2,
+     "pitch": "G4",
+     "lyric": "blind"
+    },
+    {
+     "beat": 39,
+     "dur": 0.5,
+     "pitch": "B4",
+     "lyric": "but"
+    },
+    {
+     "beat": 39.5,
+     "dur": 0.5,
+     "pitch": "G4"
+    },
+    {
+     "beat": 40,
+     "dur": 2,
+     "pitch": "B4",
+     "lyric": "now"
+    },
+    {
+     "beat": 42,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "I"
+    },
+    {
+     "beat": 43,
+     "dur": 3,
+     "pitch": "G4",
+     "lyric": "see"
+    },
+    {
+     "beat": 46,
+     "dur": 2,
+     "pitch": "G4"
+    }
+   ],
+   "chords": [
+    {
+     "beat": 1,
+     "dur": 3,
+     "symbol": "G"
+    },
+    {
+     "beat": 4,
+     "dur": 3,
+     "symbol": "G7"
+    },
+    {
+     "beat": 7,
+     "dur": 3,
+     "symbol": "C"
+    },
+    {
+     "beat": 10,
+     "dur": 3,
+     "symbol": "G"
+    },
+    {
+     "beat": 13,
+     "dur": 3,
+     "symbol": "G"
+    },
+    {
+     "beat": 16,
+     "dur": 3,
+     "symbol": "Em"
+    },
+    {
+     "beat": 19,
+     "dur": 3,
+     "symbol": "D"
+    },
+    {
+     "beat": 22,
+     "dur": 3,
+     "symbol": "D7"
+    },
+    {
+     "beat": 25,
+     "dur": 3,
+     "symbol": "G"
+    },
+    {
+     "beat": 28,
+     "dur": 3,
+     "symbol": "G7"
+    },
+    {
+     "beat": 31,
+     "dur": 3,
+     "symbol": "C"
+    },
+    {
+     "beat": 34,
+     "dur": 3,
+     "symbol": "G"
+    },
+    {
+     "beat": 37,
+     "dur": 3,
+     "symbol": "Em"
+    },
+    {
+     "beat": 40,
+     "dur": 3,
+     "symbol": "D7"
+    },
+    {
+     "beat": 43,
+     "dur": 3,
+     "symbol": "G"
+    },
+    {
+     "beat": 46,
+     "dur": 3,
+     "symbol": "G"
+    }
+   ]
+  },
+  {
+   "format": "piano-song",
+   "version": 1,
+   "id": "seed-ode-to-joy",
+   "title": "Ode to Joy (simple placeholder, with left hand)",
+   "composer": "Ludwig van Beethoven (public domain)",
+   "source": "Simplified placeholder; includes a hand-written block-chord left hand as an example arrangement",
+   "placeholder": true,
+   "key": "C",
+   "timeSignature": "4/4",
+   "tempo": 96,
+   "pickupBeats": 0,
+   "tags": [
+    "classical",
+    "placeholder",
+    "beginner"
+   ],
+   "melody": [
+    {
+     "beat": 0,
+     "dur": 1,
+     "pitch": "E4"
+    },
+    {
+     "beat": 1,
+     "dur": 1,
+     "pitch": "E4"
+    },
+    {
+     "beat": 2,
+     "dur": 1,
+     "pitch": "F4"
+    },
+    {
+     "beat": 3,
+     "dur": 1,
+     "pitch": "G4"
+    },
+    {
+     "beat": 4,
+     "dur": 1,
+     "pitch": "G4"
+    },
+    {
+     "beat": 5,
+     "dur": 1,
+     "pitch": "F4"
+    },
+    {
+     "beat": 6,
+     "dur": 1,
+     "pitch": "E4"
+    },
+    {
+     "beat": 7,
+     "dur": 1,
+     "pitch": "D4"
+    },
+    {
+     "beat": 8,
+     "dur": 1,
+     "pitch": "C4"
+    },
+    {
+     "beat": 9,
+     "dur": 1,
+     "pitch": "C4"
+    },
+    {
+     "beat": 10,
+     "dur": 1,
+     "pitch": "D4"
+    },
+    {
+     "beat": 11,
+     "dur": 1,
+     "pitch": "E4"
+    },
+    {
+     "beat": 12,
+     "dur": 1.5,
+     "pitch": "E4"
+    },
+    {
+     "beat": 13.5,
+     "dur": 0.5,
+     "pitch": "D4"
+    },
+    {
+     "beat": 14,
+     "dur": 2,
+     "pitch": "D4"
+    },
+    {
+     "beat": 16,
+     "dur": 1,
+     "pitch": "E4"
+    },
+    {
+     "beat": 17,
+     "dur": 1,
+     "pitch": "E4"
+    },
+    {
+     "beat": 18,
+     "dur": 1,
+     "pitch": "F4"
+    },
+    {
+     "beat": 19,
+     "dur": 1,
+     "pitch": "G4"
+    },
+    {
+     "beat": 20,
+     "dur": 1,
+     "pitch": "G4"
+    },
+    {
+     "beat": 21,
+     "dur": 1,
+     "pitch": "F4"
+    },
+    {
+     "beat": 22,
+     "dur": 1,
+     "pitch": "E4"
+    },
+    {
+     "beat": 23,
+     "dur": 1,
+     "pitch": "D4"
+    },
+    {
+     "beat": 24,
+     "dur": 1,
+     "pitch": "C4"
+    },
+    {
+     "beat": 25,
+     "dur": 1,
+     "pitch": "C4"
+    },
+    {
+     "beat": 26,
+     "dur": 1,
+     "pitch": "D4"
+    },
+    {
+     "beat": 27,
+     "dur": 1,
+     "pitch": "E4"
+    },
+    {
+     "beat": 28,
+     "dur": 1.5,
+     "pitch": "D4"
+    },
+    {
+     "beat": 29.5,
+     "dur": 0.5,
+     "pitch": "C4"
+    },
+    {
+     "beat": 30,
+     "dur": 2,
+     "pitch": "C4"
+    }
+   ],
+   "chords": [
+    {
+     "beat": 0,
+     "dur": 4,
+     "symbol": "C"
+    },
+    {
+     "beat": 4,
+     "dur": 4,
+     "symbol": "G"
+    },
+    {
+     "beat": 8,
+     "dur": 4,
+     "symbol": "C"
+    },
+    {
+     "beat": 12,
+     "dur": 4,
+     "symbol": "G"
+    },
+    {
+     "beat": 16,
+     "dur": 4,
+     "symbol": "C"
+    },
+    {
+     "beat": 20,
+     "dur": 4,
+     "symbol": "G"
+    },
+    {
+     "beat": 24,
+     "dur": 2,
+     "symbol": "C"
+    },
+    {
+     "beat": 26,
+     "dur": 2,
+     "symbol": "G"
+    },
+    {
+     "beat": 28,
+     "dur": 2,
+     "symbol": "G"
+    },
+    {
+     "beat": 30,
+     "dur": 2,
+     "symbol": "C"
+    }
+   ],
+   "arrangement": {
+    "style": "manual",
+    "leftHand": [
+     {
+      "beat": 0,
+      "dur": 4,
+      "pitches": [
+       "C3",
+       "E3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 4,
+      "dur": 4,
+      "pitches": [
+       "B2",
+       "D3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 8,
+      "dur": 4,
+      "pitches": [
+       "C3",
+       "E3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 12,
+      "dur": 4,
+      "pitches": [
+       "B2",
+       "D3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 16,
+      "dur": 4,
+      "pitches": [
+       "C3",
+       "E3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 20,
+      "dur": 4,
+      "pitches": [
+       "B2",
+       "D3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 24,
+      "dur": 2,
+      "pitches": [
+       "C3",
+       "E3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 26,
+      "dur": 2,
+      "pitches": [
+       "B2",
+       "D3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 28,
+      "dur": 2,
+      "pitches": [
+       "B2",
+       "D3",
+       "G3"
+      ]
+     },
+     {
+      "beat": 30,
+      "dur": 2,
+      "pitches": [
+       "C3",
+       "E3",
+       "G3"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "format": "piano-song",
+   "version": 1,
+   "id": "seed-the-entertainer",
+   "title": "The Entertainer – opening theme (simple placeholder)",
+   "composer": "Scott Joplin, 1902 (public domain)",
+   "source": "Heavily simplified placeholder of the A theme — not the original rhythm/harmony",
+   "placeholder": true,
+   "key": "C",
+   "timeSignature": "2/4",
+   "tempo": 76,
+   "pickupBeats": 0.5,
+   "tags": [
+    "ragtime",
+    "placeholder"
+   ],
+   "melody": [
+    {
+     "beat": 0,
+     "dur": 0.25,
+     "pitch": "D4"
+    },
+    {
+     "beat": 0.25,
+     "dur": 0.25,
+     "pitch": "D#4"
+    },
+    {
+     "beat": 0.5,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 0.75,
+     "dur": 0.5,
+     "pitch": "C5"
+    },
+    {
+     "beat": 1.25,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 1.5,
+     "dur": 0.5,
+     "pitch": "C5"
+    },
+    {
+     "beat": 2,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 2.25,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 2.5,
+     "dur": 1.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 3.75,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 4,
+     "dur": 0.25,
+     "pitch": "D5"
+    },
+    {
+     "beat": 4.25,
+     "dur": 0.25,
+     "pitch": "D#5"
+    },
+    {
+     "beat": 4.5,
+     "dur": 0.25,
+     "pitch": "E5"
+    },
+    {
+     "beat": 4.75,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 5,
+     "dur": 0.25,
+     "pitch": "D5"
+    },
+    {
+     "beat": 5.25,
+     "dur": 0.5,
+     "pitch": "E5"
+    },
+    {
+     "beat": 5.75,
+     "dur": 0.25,
+     "pitch": "B4"
+    },
+    {
+     "beat": 6,
+     "dur": 0.5,
+     "pitch": "D5"
+    },
+    {
+     "beat": 6.5,
+     "dur": 1.5,
+     "pitch": "C5"
+    },
+    {
+     "beat": 8,
+     "dur": 0.25,
+     "pitch": "D4"
+    },
+    {
+     "beat": 8.25,
+     "dur": 0.25,
+     "pitch": "D#4"
+    },
+    {
+     "beat": 8.5,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 8.75,
+     "dur": 0.5,
+     "pitch": "C5"
+    },
+    {
+     "beat": 9.25,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 9.5,
+     "dur": 0.5,
+     "pitch": "C5"
+    },
+    {
+     "beat": 10,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 10.25,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 10.5,
+     "dur": 1.5,
+     "pitch": "C5"
+    },
+    {
+     "beat": 12,
+     "dur": 0.25,
+     "pitch": "A4"
+    },
+    {
+     "beat": 12.25,
+     "dur": 0.25,
+     "pitch": "G4"
+    },
+    {
+     "beat": 12.5,
+     "dur": 0.25,
+     "pitch": "F#4"
+    },
+    {
+     "beat": 12.75,
+     "dur": 0.25,
+     "pitch": "A4"
+    },
+    {
+     "beat": 13,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 13.25,
+     "dur": 0.5,
+     "pitch": "E5"
+    },
+    {
+     "beat": 13.75,
+     "dur": 0.25,
+     "pitch": "D5"
+    },
+    {
+     "beat": 14,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 14.25,
+     "dur": 0.25,
+     "pitch": "A4"
+    },
+    {
+     "beat": 14.5,
+     "dur": 1.5,
+     "pitch": "D5"
+    },
+    {
+     "beat": 16,
+     "dur": 0.25,
+     "pitch": "D4"
+    },
+    {
+     "beat": 16.25,
+     "dur": 0.25,
+     "pitch": "D#4"
+    },
+    {
+     "beat": 16.5,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 16.75,
+     "dur": 0.5,
+     "pitch": "C5"
+    },
+    {
+     "beat": 17.25,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 17.5,
+     "dur": 0.5,
+     "pitch": "C5"
+    },
+    {
+     "beat": 18,
+     "dur": 0.25,
+     "pitch": "E4"
+    },
+    {
+     "beat": 18.25,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 18.5,
+     "dur": 1.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 19.75,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 20,
+     "dur": 0.25,
+     "pitch": "D5"
+    },
+    {
+     "beat": 20.25,
+     "dur": 0.25,
+     "pitch": "D#5"
+    },
+    {
+     "beat": 20.5,
+     "dur": 0.25,
+     "pitch": "E5"
+    },
+    {
+     "beat": 20.75,
+     "dur": 0.25,
+     "pitch": "C5"
+    },
+    {
+     "beat": 21,
+     "dur": 0.25,
+     "pitch": "D5"
+    },
+    {
+     "beat": 21.25,
+     "dur": 0.5,
+     "pitch": "E5"
+    },
+    {
+     "beat": 21.75,
+     "dur": 0.25,
+     "pitch": "B4"
+    },
+    {
+     "beat": 22,
+     "dur": 0.5,
+     "pitch": "D5"
+    },
+    {
+     "beat": 22.5,
+     "dur": 2,
+     "pitch": "C5"
+    }
+   ],
+   "chords": [
+    {
+     "beat": 0.5,
+     "dur": 2,
+     "symbol": "C"
+    },
+    {
+     "beat": 2.5,
+     "dur": 2,
+     "symbol": "C"
+    },
+    {
+     "beat": 4.5,
+     "dur": 1,
+     "symbol": "C"
+    },
+    {
+     "beat": 5.5,
+     "dur": 1,
+     "symbol": "G7"
+    },
+    {
+     "beat": 6.5,
+     "dur": 2,
+     "symbol": "C"
+    },
+    {
+     "beat": 8.5,
+     "dur": 2,
+     "symbol": "C"
+    },
+    {
+     "beat": 10.5,
+     "dur": 2,
+     "symbol": "C"
+    },
+    {
+     "beat": 12.5,
+     "dur": 2,
+     "symbol": "D7"
+    },
+    {
+     "beat": 14.5,
+     "dur": 2,
+     "symbol": "G7"
+    },
+    {
+     "beat": 16.5,
+     "dur": 2,
+     "symbol": "C"
+    },
+    {
+     "beat": 18.5,
+     "dur": 2,
+     "symbol": "C7"
+    },
+    {
+     "beat": 20.5,
+     "dur": 1,
+     "symbol": "F"
+    },
+    {
+     "beat": 21.5,
+     "dur": 1,
+     "symbol": "G7"
+    },
+    {
+     "beat": 22.5,
+     "dur": 2,
+     "symbol": "C"
+    }
+   ]
+  },
+  {
+   "format": "piano-song",
+   "version": 1,
+   "id": "seed-saints",
+   "title": "When the Saints Go Marching In (simple placeholder)",
+   "composer": "Traditional (public domain)",
+   "source": "Simplified placeholder melody",
+   "placeholder": true,
+   "key": "F",
+   "timeSignature": "4/4",
+   "tempo": 100,
+   "pickupBeats": 3,
+   "tags": [
+    "gospel",
+    "placeholder"
+   ],
+   "melody": [
+    {
+     "beat": 0,
+     "dur": 1,
+     "pitch": "F4",
+     "lyric": "Oh"
+    },
+    {
+     "beat": 1,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "when"
+    },
+    {
+     "beat": 2,
+     "dur": 1,
+     "pitch": "Bb4",
+     "lyric": "the"
+    },
+    {
+     "beat": 3,
+     "dur": 4,
+     "pitch": "C5",
+     "lyric": "saints"
+    },
+    {
+     "beat": 8,
+     "dur": 1,
+     "pitch": "F4",
+     "lyric": "go"
+    },
+    {
+     "beat": 9,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "march-"
+    },
+    {
+     "beat": 10,
+     "dur": 1,
+     "pitch": "Bb4",
+     "lyric": "ing"
+    },
+    {
+     "beat": 11,
+     "dur": 4,
+     "pitch": "C5",
+     "lyric": "in"
+    },
+    {
+     "beat": 16,
+     "dur": 1,
+     "pitch": "F4",
+     "lyric": "oh"
+    },
+    {
+     "beat": 17,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "when"
+    },
+    {
+     "beat": 18,
+     "dur": 1,
+     "pitch": "Bb4",
+     "lyric": "the"
+    },
+    {
+     "beat": 19,
+     "dur": 2,
+     "pitch": "C5",
+     "lyric": "saints"
+    },
+    {
+     "beat": 21,
+     "dur": 2,
+     "pitch": "A4",
+     "lyric": "go"
+    },
+    {
+     "beat": 23,
+     "dur": 2,
+     "pitch": "F4",
+     "lyric": "march-"
+    },
+    {
+     "beat": 25,
+     "dur": 2,
+     "pitch": "A4",
+     "lyric": "ing"
+    },
+    {
+     "beat": 27,
+     "dur": 4,
+     "pitch": "G4",
+     "lyric": "in"
+    },
+    {
+     "beat": 32,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "oh"
+    },
+    {
+     "beat": 33,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "Lord"
+    },
+    {
+     "beat": 34,
+     "dur": 1,
+     "pitch": "G4",
+     "lyric": "I"
+    },
+    {
+     "beat": 35,
+     "dur": 3,
+     "pitch": "F4",
+     "lyric": "want"
+    },
+    {
+     "beat": 38,
+     "dur": 1,
+     "pitch": "F4",
+     "lyric": "to"
+    },
+    {
+     "beat": 39,
+     "dur": 2,
+     "pitch": "A4",
+     "lyric": "be"
+    },
+    {
+     "beat": 41,
+     "dur": 1,
+     "pitch": "C5",
+     "lyric": "in"
+    },
+    {
+     "beat": 42,
+     "dur": 1,
+     "pitch": "C5"
+    },
+    {
+     "beat": 43,
+     "dur": 1,
+     "pitch": "C5",
+     "lyric": "that"
+    },
+    {
+     "beat": 44,
+     "dur": 3,
+     "pitch": "Bb4",
+     "lyric": "num-"
+    },
+    {
+     "beat": 48,
+     "dur": 1,
+     "pitch": "A4",
+     "lyric": "ber"
+    },
+    {
+     "beat": 49,
+     "dur": 1,
+     "pitch": "Bb4",
+     "lyric": "when"
+    },
+    {
+     "beat": 50,
+     "dur": 1,
+     "pitch": "C5",
+     "lyric": "the"
+    },
+    {
+     "beat": 51,
+     "dur": 2,
+     "pitch": "A4",
+     "lyric": "saints"
+    },
+    {
+     "beat": 53,
+     "dur": 2,
+     "pitch": "F4",
+     "lyric": "go"
+    },
+    {
+     "beat": 55,
+     "dur": 2,
+     "pitch": "G4",
+     "lyric": "march-"
+    },
+    {
+     "beat": 57,
+     "dur": 2,
+     "pitch": "G4",
+     "lyric": "ing"
+    },
+    {
+     "beat": 59,
+     "dur": 4,
+     "pitch": "F4",
+     "lyric": "in"
+    }
+   ],
+   "chords": [
+    {
+     "beat": 3,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 7,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 11,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 15,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 19,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 23,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 27,
+     "dur": 4,
+     "symbol": "C7"
+    },
+    {
+     "beat": 31,
+     "dur": 4,
+     "symbol": "C7"
+    },
+    {
+     "beat": 35,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 39,
+     "dur": 4,
+     "symbol": "F7"
+    },
+    {
+     "beat": 43,
+     "dur": 4,
+     "symbol": "Bb"
+    },
+    {
+     "beat": 47,
+     "dur": 4,
+     "symbol": "Bb"
+    },
+    {
+     "beat": 51,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 55,
+     "dur": 4,
+     "symbol": "C7"
+    },
+    {
+     "beat": 59,
+     "dur": 4,
+     "symbol": "F"
+    },
+    {
+     "beat": 63,
+     "dur": 4,
+     "symbol": "F"
+    }
+   ]
+  }
+ ]
+}
