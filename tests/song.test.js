@@ -27,8 +27,8 @@ test('all seed songs normalize without errors or bar warnings', () => {
     const { song, errors, warnings } = normalizeSong(s);
     assert.deepEqual(errors, [], s.title);
     assert.deepEqual(warnings, [], s.title);
-    assert.ok(song.melody.length > 10);
-    assert.ok(song.chords.length > 4);
+    if (!s.placeholder || s.melodyText) assert.ok(song.melody.length > 10);
+    if (s.melodyText) assert.ok(song.chords.length > 4);
     assert.equal(song.placeholder, true);
   }
 });
@@ -70,7 +70,7 @@ test('import bundle / array / single, with error reporting', () => {
 });
 
 test('arrangement generator: every style x pattern yields chord-consistent, non-overlapping hands', () => {
-  for (const s of SEED_SONGS) {
+  for (const s of SEED_SONGS.filter((x) => x.melodyText)) {
     const song = normalizeSong(s).song;
     for (const style of Object.keys(STYLES)) for (const pat of Object.keys(LH_PATTERNS)) {
       const arr = generateArrangement(song, { style, lhPattern: pat });

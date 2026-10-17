@@ -145,7 +145,7 @@ test('existing libraries: seed songs saved before the lyrics feature get the exa
   const all = await store.all();
   assert.ok(all.find((s) => s.id === oldSeed.id).lyrics.length > 5);
   assert.equal(all.find((s) => s.id === mine.id).lyrics, null);
-  assert.equal(all.length, 2);
+  assert.equal(all.length, 3); // + preloaded chords-only song
 });
 
 test('AI prompt documents lyricsText', async () => {
