@@ -300,7 +300,8 @@
      "dur": 3,
      "symbol": "G"
     }
-   ]
+   ],
+   "lyricsText": "[Verse 1]\nA[G]mazing [G7]grace, how [C]sweet the [G]sound\nThat saved a [Em]wretch like [D]me [D7]\nI [G]once was [G7]lost, but [C]now am [G]found,\nWas [Em]blind, but [D7]now I [G]see.\n\n[Verse 2]\n'Twas [G]grace that [G7]taught my [C]heart to [G]fear,\nAnd grace my [Em]fears re[D]lieved; [D7]\nHow [G]precious [G7]did that [C]grace ap[G]pear\nThe [Em]hour I [D7]first be[G]lieved."
   },
   {
    "format": "piano-song",
@@ -1297,7 +1298,8 @@
      "dur": 4,
      "symbol": "F"
     }
-   ]
+   ],
+   "lyricsText": "Oh when the [F]saints go marching in,\nOh when the saints go marching [C7]in,\nOh Lord, I [F]want to [F7]be in [Bb]that number,\nWhen the [F]saints go [C7]marching [F]in."
   }
  ]
 }

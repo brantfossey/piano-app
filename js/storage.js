@@ -23,7 +23,14 @@ export class SongStore {
     if (!all.length && !this.flag('seeded')) {
       for (const s of SEED_SONGS) await this.put(normalizeSong(s).song);
       this.flag('seeded', true);
+    } else if (!this.flag('seed-lyrics-v1')) {
+      // libraries created before the Lyrics & Chords view: add the example lyrics to untouched-lyrics seed songs
+      for (const seed of SEED_SONGS) {
+        const have = all.find((s) => s.id === seed.id);
+        if (have && !have.lyrics && seed.lyricsText) { have.lyrics = normalizeSong(seed).song.lyrics; await this.put(have); }
+      }
     }
+    this.flag('seed-lyrics-v1', true);
   }
   flag(k, v) {
     if (typeof localStorage === 'undefined') return v;

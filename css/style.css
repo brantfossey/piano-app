@@ -1,11 +1,12 @@
 :root {
   --bg: #f6f4ef; --panel: #fff; --ink: #1d1d1f; --muted: #6b6b70; --line: #d9d5cc;
   --accent: #2463eb; --good: #16a34a; --bad: #dc2626; --warn: #d97706; --hint: #f59e0b;
-  --played: #3b82f6;
+  --played: #3b82f6; --played-dark: #1e40af;
+  --target: #f97316; --target-light: #fdba74; --target-dark: #c2410c;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 250px; }
+body { margin: 0; background: var(--bg); color: var(--ink); display: flex; flex-direction: column; min-height: 100vh; padding-bottom: 190px; }
 button, select, input, textarea { font: inherit; }
 button { border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 5px 10px; cursor: pointer; }
 button:hover { border-color: var(--accent); }
@@ -34,6 +35,7 @@ main { padding: 10px 14px; flex: 1; }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
 .row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 4px 0; }
 .row label { font-size: 13px; display: inline-flex; gap: 5px; align-items: center; }
+.row label { max-width: 100%; } .row label select { min-width: 0; flex: 0 1 auto; }
 label.grow { flex: 1; min-width: 200px; } label.grow input { flex: 1; }
 label.block { display: block; font-size: 13px; margin: 6px 0; }
 .result { font-size: 15px; min-height: 2.4em; }
@@ -51,6 +53,7 @@ svg.score { display: block; }
 .acc { font: 15px "Segoe UI Symbol", "Noto Music", "Apple Symbols", serif; fill: #222; }
 .mnum { font-size: 9px; fill: #888; }
 .chordsym { font: 700 15px Georgia, serif; fill: #8a1c1c; }
+.chordsub { font: 400 9px system-ui, sans-serif; fill: #8a1c1c; }
 .lyric { font-size: 11px; fill: #555; text-anchor: middle; }
 .head { fill: #111; stroke: #111; stroke-width: 1; } .head.hollow { fill: #fff; stroke-width: 1.6; }
 .stem { stroke: #111; stroke-width: 1.3; } .flag { fill: #111; stroke: #111; stroke-width: .8; }
@@ -87,32 +90,80 @@ dialog { border: 1px solid var(--line); border-radius: 10px; width: min(760px, 9
 .stats table { border-collapse: collapse; font-size: 13px; } .stats td, .stats th { border-bottom: 1px solid var(--line); padding: 3px 10px; text-align: left; }
 .prose { max-width: 860px; line-height: 1.5; }
 
-/* live footer */
+/* live footer: compact notation panel on the far left, piano keys fill the rest of the width */
 footer.live { position: fixed; left: 0; right: 0; bottom: 0; background: #23283a; color: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,.2); z-index: 10; }
-.livebar { display: flex; align-items: center; gap: 14px; padding: 4px 12px; height: 118px; }
-.livechord { min-width: 150px; }
-.chordname { font: 700 34px Georgia, serif; color: #ffd27a; }
-.livechord .small, .livenotes .small { color: #c8cbd6; }
-.livestaff { background: #fff; border-radius: 6px; width: 200px; height: 110px; overflow: hidden; }
-.livestaff svg { width: 200px; height: auto; }
-.livenotes { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.livenotes select { font-size: 12px; padding: 1px 4px; }
-.keyboard { height: 120px; padding: 0 4px 4px; }
-svg.piano { width: 100%; height: 100%; touch-action: none; user-select: none; }
+.livewrap { display: flex; align-items: stretch; gap: 6px; padding: 4px 6px 6px; }
+.livepanel { flex: 0 0 176px; width: 176px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.livechord { display: flex; align-items: baseline; gap: 6px; min-height: 26px; overflow: hidden; white-space: nowrap; }
+.chordname { font: 700 22px Georgia, serif; color: #ffd27a; overflow: hidden; text-overflow: ellipsis; }
+.livechord .small, .livenotes, .livealt { color: #c8cbd6; }
+#liveInv { overflow: hidden; text-overflow: ellipsis; }
+.kbctrl { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.kbctrl button { white-space: nowrap; }
+.kbctrl label { display: inline-flex; gap: 3px; align-items: center; color: #c8cbd6; }
+.kbctrl select { font-size: 12px; padding: 0 2px; }
+#kbToggle { color: #23283a; }
+.livestaff { background: #fff; border-radius: 6px; width: 100%; overflow: hidden; }
+.livestaff svg { width: 100%; height: auto; display: block; }
+.livenotes { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 14px; }
+.livealt { opacity: .8; }
+.keyboard { flex: 1 1 auto; min-width: 0; min-height: 120px; }
+svg.piano { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; }
 .key.white { fill: #fff; stroke: #333; stroke-width: .8; }
 .key.black { fill: #1b1b1b; stroke: #000; }
 .keylabel { font-size: 9px; fill: #888; pointer-events: none; }
+/* highlight states, identical on the keys and on the staff noteheads:
+   hint = yellow, target = orange, pressed = blue, pressed + target = green, wrong = red */
 .key.hint { fill: #fde68a; } .key.black.hint { fill: #b7791f; }
-.key.target { fill: #bbf7d0; } .key.black.target { fill: #15803d; }
-.key.played { fill: var(--played); } .key.black.played { fill: #1e40af; }
+.key.target { fill: var(--target-light); } .key.black.target { fill: var(--target-dark); }
+.key.played { fill: var(--played); } .key.black.played { fill: var(--played-dark); }
 .key.played.target, .key.good { fill: var(--good) !important; }
 .key.wrong { fill: var(--bad) !important; }
-@media (max-width: 700px) {
-  .livestaff { display: none; } .chordname { font-size: 26px; } .livebar { height: 70px; }
-  body { padding-bottom: 200px; }
-}
+svg .head.hint { fill: #f5c542; stroke: #b7791f; }
+svg .head.target { fill: var(--target); stroke: var(--target-dark); }
+svg .head.played { fill: var(--played); stroke: var(--played-dark); }
+svg .head.played.target, svg .head.good { fill: var(--good); stroke: #15803d; }
+svg .head.wrong { fill: var(--bad); stroke: var(--bad); }
 footer.live.collapsed .keyboard { display: none; }
-body.kb-collapsed { padding-bottom: 130px; }
+@media (max-width: 700px) {
+  .livepanel { flex-basis: 116px; width: 116px; }
+  .chordname { font-size: 17px; } .livechord { min-height: 21px; }
+  .livealt, #livePedal, .kblabel { display: none; }
+  .kbctrl { gap: 4px; }
+  .keyboard { min-height: 104px; }
+  .midi-controls select { max-width: 150px; }
+  .tabs { overflow-x: auto; } .tabs button { padding: 8px 10px; white-space: nowrap; }
+  main { padding: 8px; }
+}
+/* phones in landscape: keep the footer short so the music stays visible */
+@media (max-height: 500px) {
+  .livepanel { flex-basis: 112px; width: 112px; }
+  .chordname { font-size: 16px; } .livechord { min-height: 19px; }
+  .livealt, #livePedal, .kblabel { display: none; }
+  .keyboard { min-height: 84px; }
+  .lyricsheet { max-height: none; }
+}
 [hidden] { display: none !important; }
-#kbToggle { align-self: flex-start; color: #23283a; }
 select { max-width: 100%; }
+
+/* lyrics & chords (Ultimate-Guitar style chord sheet) */
+.follow-display .symbol { min-height: 1.15em; }
+.invsub { display: block; font: 400 13px system-ui, sans-serif; color: var(--muted); margin-top: -4px; }
+.chordname + .small:empty { display: none; }
+.feedback .ok { color: var(--good); } .feedback .warn { color: var(--warn); }
+.lyricsheet { max-height: 52vh; overflow: auto; line-height: 1.25; }
+.lyricsheet.size-s { font-size: 15px; } .lyricsheet.size-m { font-size: 19px; } .lyricsheet.size-l { font-size: 25px; }
+.lline { display: flex; flex-wrap: wrap; align-items: flex-end; padding: 2px 6px; margin: 0 0 .45em; border-radius: 8px; }
+.lline.currentline { background: #f1eee7; }
+.lblank { height: .6em; }
+.lsection { font: 700 .72em system-ui, sans-serif; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: .7em 0 .25em 6px; }
+.lw { display: inline-flex; white-space: nowrap; }
+.lp { display: inline-flex; flex-direction: column; }
+.lc { font: 700 .86em Georgia, serif; color: #8a1c1c; min-height: 1.25em; padding-right: .45em; border-radius: 5px; white-space: nowrap; }
+.lc.target { cursor: pointer; } .lc.target:hover { text-decoration: underline; }
+.lc.nc { color: var(--muted); font-weight: 400; }
+.lc .invsub { display: inline; font-size: .6em; margin: 0 0 0 2px; color: inherit; opacity: .8; }
+.lc.done { color: #c4a9a9; }
+.lc.current { background: var(--target); color: #fff; padding: 0 .3em; box-shadow: 0 0 0 2px var(--target-light); }
+.lt { white-space: pre; }
+.trainer-display .symbol .invsub { font-size: 15px; }

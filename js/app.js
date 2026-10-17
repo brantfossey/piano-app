@@ -4,7 +4,8 @@ import { AudioEngine } from './audio.js';
 import { PianoKeyboard } from './keyboard.js';
 import { ScoreView } from './staff.js';
 import { SongStore } from './storage.js';
-import { detectChords, midiToName, spellMidi, parseChordSymbol, voiceChord, beatsPerMeasure, QUALITY_BY_ID, ROOT_NAMES, parseDuration } from './theory.js';
+import { detectChords, midiToName, spellMidi, parseChordSymbol, voiceChord, beatsPerMeasure, QUALITY_BY_ID, ROOT_NAMES, parseDuration, parsePitchClass, chordDisplay, INVERSION_DISPLAY_MODES } from './theory.js';
+import { songSheet, followSequence, FollowAlong, targetVoicing, chordToneNames, lyricsToText } from './lyrics.js';
 import { normalizeSong, songToJson, eventsToText, chordsToText, parseImport, exportBundle, parseNoteText, measureStarts } from './songformat.js';
 import { generateArrangement, STYLES, LH_PATTERNS } from './arranger.js';
 import { buildTargets, buildSteps, WaitEngine, SteadyEngine, HAND_MODES } from './practice.js';
@@ -15,7 +16,9 @@ const $ = (id) => document.getElementById(id);
 const hub = new MidiHub();
 const audio = new AudioEngine();
 const store = new SongStore();
-const settings = Object.assign({ tab: 'practice', style: 'pop', pattern: 'auto', hands: 'melody+chords', mode: 'wait', kbRange: '61' }, JSON.parse(localStorage.getItem('cfp-settings') || '{}'));
+const settings = Object.assign({ tab: 'practice', style: 'pop', pattern: 'auto', hands: 'melody+chords', mode: 'wait',
+  kbRange: window.innerWidth >= 700 ? '88' : '49', invDisplay: 'slash', lyricsSize: 'm' }, JSON.parse(localStorage.getItem('cfp-settings') || '{}'));
+if (!INVERSION_DISPLAY_MODES[settings.invDisplay]) settings.invDisplay = 'slash';
 const saveSettings = () => localStorage.setItem('cfp-settings', JSON.stringify(settings));
 let songs = [];
 let currentSongId = settings.songId || null;
@@ -27,6 +30,8 @@ const keyboard = new PianoKeyboard($('keyboard'), {
   low: KB_RANGES[settings.kbRange][0], high: KB_RANGES[settings.kbRange][1],
   onNoteOn: (n, v) => { audio.note(n, 0.8, 0.7); hub.noteOn(n, v, now(), 'screen'); },
   onNoteOff: (n) => hub.noteOff(n, now(), 'screen'),
+  // any highlight change (targets, hints, wrong/good flashes) is mirrored on the live staff
+  onChange: (kind) => { if (kind !== 'played') scheduleLive(); },
 });
 $('kbRange').value = settings.kbRange;
 $('kbRange').onchange = (e) => { settings.kbRange = e.target.value; saveSettings(); keyboard.setRange(...KB_RANGES[e.target.value]); };
@@ -34,6 +39,27 @@ const setKbCollapsed = (c) => { document.querySelector('footer.live').classList.
 setKbCollapsed(!!settings.kbCollapsed);
 $('kbToggle').onclick = () => { settings.kbCollapsed = !settings.kbCollapsed; saveSettings(); setKbCollapsed(settings.kbCollapsed); };
 const liveStaff = new ScoreView($('liveStaff'), { compact: true, measuresPerRow: 1 });
+// keep the page content clear of the fixed footer (its height depends on screen width and the hide-keys toggle)
+const footerEl = document.querySelector('footer.live');
+const fitFooter = () => { document.body.style.paddingBottom = footerEl.offsetHeight + 12 + 'px'; };
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fitFooter).observe(footerEl);
+window.addEventListener('resize', fitFooter);
+
+// chord-name display setting (slash / name + inversion label / name only)
+Object.entries(INVERSION_DISPLAY_MODES).forEach(([k, v]) => $('invDisplay').add(new Option(v, k)));
+$('invDisplay').value = settings.invDisplay;
+const fmtChord = (c, opts) => chordDisplay(c, settings.invDisplay, opts);
+const chordLabel = (sym) => fmtChord(sym);
+/** HTML for a chord: big name + small inversion text (when the setting asks for it). */
+function chordHtml(c, opts) {
+  const d = fmtChord(c, opts);
+  return escapeHtml(d.main) + (d.sub ? `<span class="invsub">${escapeHtml(d.sub)}</span>` : '');
+}
+$('invDisplay').onchange = (e) => {
+  settings.invDisplay = e.target.value; saveSettings();
+  updateLive(); renderPracticeScore(); editor.renderPreview(); lyricsView.render(true);
+  if (trainer.running && trainer.items[trainer.idx]) trainer.showSymbol(trainer.items[trainer.idx]);
+};
 
 function contextKey() { return currentSong()?.key || 'C'; }
 function updateLive() {
@@ -41,22 +67,28 @@ function updateLive() {
   const sounding = hub.soundingNotes();
   keyboard.set('played', sounding);
   const key = contextKey();
+  // the live staff shows every highlighted note (pressed, target, hint …) with the same state classes as the keys
+  const shown = keyboard.highlighted();
   liveStaff.render({ key, timeSignature: '4/4', totalBeats: 4,
-    rh: sounding.filter((n) => n >= 60).length ? [{ beat: 0, dur: 4, pitches: sounding.filter((n) => n >= 60) }] : [],
-    lh: sounding.filter((n) => n < 60).length ? [{ beat: 0, dur: 4, pitches: sounding.filter((n) => n < 60) }] : [] });
+    rh: shown.filter((n) => n >= 60).length ? [{ beat: 0, dur: 4, pitches: shown.filter((n) => n >= 60) }] : [],
+    lh: shown.filter((n) => n < 60).length ? [{ beat: 0, dur: 4, pitches: shown.filter((n) => n < 60) }] : [],
+    noteClass: (m) => keyboard.classesOf(m) });
   const det = detectChords(held.length >= 2 ? held : sounding, { key });
-  $('liveChord').textContent = det[0]?.symbol || (held.length ? midiToName(held[0], key) : '—');
-  $('liveInv').textContent = det[0]?.inversionName || '';
-  $('liveAlt').textContent = det.length > 1 ? 'also: ' + det.slice(1).map((d) => d.symbol).join(', ') : '';
+  const d = det[0] ? fmtChord(det[0], { rootLabel: true }) : null;
+  $('liveChord').textContent = d?.main || (held.length ? midiToName(held[0], key) : '—');
+  $('liveInv').textContent = d?.sub || '';
+  const alts = [...new Set(det.slice(1).map((x) => fmtChord(x).main))].filter((x) => x !== d?.main);
+  $('liveAlt').textContent = alts.length ? 'also: ' + alts.join(', ') : '';
   $('liveNotes').textContent = held.map((n) => spellMidi(n, key).name).join(' ');
   $('livePedal').textContent = hub.pedal ? 'Pedal ⬇' : '';
 }
 let liveRaf = 0;
+function scheduleLive() { if (!liveRaf) liveRaf = requestAnimationFrame(() => { liveRaf = 0; updateLive(); }); }
 hub.on((ev) => {
   if (ev.type === 'noteon' && ev.source === 'midi' && $('monitorMidi').checked) audio.note(ev.note, 0.8, ev.velocity / 127);
-  if (!liveRaf) liveRaf = requestAnimationFrame(() => { liveRaf = 0; updateLive(); });
-  if (ev.type === 'noteon') { practice.noteOn(ev.note, ev.time); trainer.onNote(); stepEntry.noteOn(ev.note); }
-  if (ev.type === 'noteoff') { practice.noteOff(ev.note, ev.time); trainer.onNote(); stepEntry.noteOff(ev.note); }
+  scheduleLive();
+  if (ev.type === 'noteon') { practice.noteOn(ev.note, ev.time); trainer.onNote(); stepEntry.noteOn(ev.note); lyricsView.noteOn(ev.note, ev.time); }
+  if (ev.type === 'noteoff') { practice.noteOff(ev.note, ev.time); trainer.onNote(); stepEntry.noteOff(ev.note); lyricsView.noteOff(ev.note); }
   if (ev.type === 'devices') refreshDevices();
 });
 
@@ -65,6 +97,10 @@ const downKeys = new Set();
 window.addEventListener('keydown', (e) => {
   if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
   const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
+  if ($('tab-lyrics').classList.contains('active') && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+    if (e.key === 'ArrowRight') lyricsView.next(); else lyricsView.back();
+    e.preventDefault(); return;
+  }
   const k = e.key.toLowerCase();
   if (k in COMPUTER_KEYS && !downKeys.has(k)) { downKeys.add(k); const n = 48 + COMPUTER_KEYS[k]; audio.note(n, 0.6, 0.7); hub.noteOn(n, 90, now(), 'computer'); e.preventDefault(); }
 });
@@ -113,6 +149,7 @@ function showTab(name) {
   document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.id === 'tab-' + name));
   settings.tab = name; saveSettings();
+  lyricsView.setActive(name === 'lyrics');
   if (name === 'practice') renderPracticeScore();
   if (name === 'library') editor.renderPreview();
 }
@@ -127,7 +164,11 @@ async function reloadSongs(selectId) {
   $('pSong').innerHTML = '';
   songs.forEach((s) => $('pSong').add(new Option(s.title, s.id)));
   $('pSong').value = currentSongId || '';
+  $('lSong').innerHTML = '';
+  songs.forEach((s) => $('lSong').add(new Option(s.title + (s.lyrics ? '' : ' (no lyrics)'), s.id)));
+  $('lSong').value = currentSongId || '';
   library.renderList();
+  lyricsView.render();
 }
 
 // ---------------- practice ----------------
@@ -160,7 +201,7 @@ function renderPracticeScore() {
   const hands = $('pHands').value;
   pScore.render({ key: s.key, timeSignature: s.timeSignature, pickupBeats: s.pickupBeats, totalBeats: s.totalBeats,
     rh: p.rightHand, lh: hands === 'melody+chords' || hands === 'chords' ? [] : p.leftHand,
-    chords: s.chords, showLyrics: true });
+    chords: s.chords, showLyrics: true, chordLabel });
   $('pArrSource').querySelector('[value=own]').disabled = !s.arrangement;
   if (!s.arrangement && $('pArrSource').value === 'own') $('pArrSource').value = 'generated';
   const gen = $('pArrSource').value === 'generated';
@@ -253,7 +294,7 @@ const practice = {
       chordHint = voiceChord(pc.rootPc, pc.quality, 0, 48).filter((n) => n < 60);
     }
     keyboard.set('hint', chordHint);
-    const label = step.chordReqs.length ? ` Chord: <b>${step.chordReqs.map((r) => r.symbol).join(', ')}</b>` : '';
+    const label = step.chordReqs.length ? ` Chord: <b>${step.chordReqs.map((r) => escapeHtml(fmtChord(r.symbol).text)).join(', ')}</b>` : '';
     const notes = step.exact.length ? ' Notes: ' + step.exact.map((n) => spellMidi(n, this.p.song.key).name).join(' ') : '';
     $('pStatus').innerHTML = `Step ${this.engine.index + 1}/${this.steps.length}.${notes}${label}`;
   },
@@ -367,6 +408,152 @@ $('pStart').onclick = () => practice.start();
 $('pStop').onclick = () => { practice.stop(); $('pStatus').textContent = 'Stopped.'; };
 $('pListen').onclick = () => practice.listen();
 
+// ---------------- lyrics & chords (follow-along) ----------------
+$('lSize').value = settings.lyricsSize;
+$('lSheet').className = 'panel lyricsheet size-' + settings.lyricsSize;
+$('lSize').onchange = (e) => { settings.lyricsSize = e.target.value; saveSettings(); $('lSheet').className = 'panel lyricsheet size-' + e.target.value; };
+$('lSong').onchange = () => {
+  currentSongId = $('lSong').value; settings.songId = currentSongId; saveSettings();
+  $('pSong').value = currentSongId; library.renderList(); lyricsView.render(); renderPracticeScore();
+};
+const lyricsView = {
+  songId: null, sheet: null, seq: [], engine: null, running: false, active: false, chordEls: [], feedback: '',
+  /** Build the chord sheet for the current song (keeps the position when only the display changed). */
+  render(keepPosition = false) {
+    const s = currentSong();
+    const sheetEl = $('lSheet');
+    if (!s) { sheetEl.textContent = 'No songs in the library.'; this.seq = []; this.engine = null; this.update(); return; }
+    const same = s.id === this.songId;
+    const sheet = songSheet(s);
+    const seq = followSequence(sheet.lines);
+    const keep = (keepPosition || same) && this.engine && this.engine.seq.length === seq.length ? this.engine.index : 0;
+    if (!same) this.running = false;
+    this.songId = s.id; this.sheet = sheet; this.seq = seq;
+    this.engine = new FollowAlong(seq, { onEvent: (e) => this.onEvent(e) });
+    this.engine.index = keep;
+    $('lSource').textContent = sheet.derived
+      ? (sheet.hasWords ? 'No lyrics field in this song: showing the melody’s syllables.' : 'No lyrics in this song: showing the chord chart.')
+      : `${s.key} · ${seq.length} chords`;
+    // DOM: lines of words; every word is a non-breaking group of [chord over text] pieces
+    sheetEl.innerHTML = '';
+    this.chordEls = [];
+    let ci = 0;
+    sheet.lines.forEach((line) => {
+      if (line.type === 'blank') { sheetEl.appendChild(Object.assign(document.createElement('div'), { className: 'lblank' })); return; }
+      if (line.type === 'section') { sheetEl.appendChild(Object.assign(document.createElement('div'), { className: 'lsection', textContent: line.label })); return; }
+      const ln = document.createElement('div'); ln.className = 'lline';
+      let word = null;
+      const newWord = () => { word = document.createElement('span'); word.className = 'lw'; ln.appendChild(word); };
+      newWord();
+      line.segs.forEach((seg) => {
+        // split the segment text into words; the chord sits on the first piece
+        const pieces = seg.text.match(/\S*\s*/g).filter(Boolean);
+        if (!pieces.length) pieces.push('');
+        pieces.forEach((txt, pi) => {
+          const piece = document.createElement('span'); piece.className = 'lp';
+          const ch = document.createElement('span'); ch.className = 'lc';
+          if (pi === 0 && seg.chord) {
+            ch.innerHTML = chordHtml(seg.chord);
+            if (seg.chord !== 'N.C.') {
+              const idx = ci++;
+              ch.classList.add('target'); ch.dataset.idx = idx; ch.title = 'Jump here';
+              ch.onclick = () => { if (!this.running) this.start(idx); else this.engine.goto(idx); };
+              this.chordEls[idx] = ch;
+            } else ch.classList.add('nc');
+          } else ch.innerHTML = '&nbsp;';
+          const tx = document.createElement('span'); tx.className = 'lt'; tx.textContent = txt || (seg.chord ? '\u00a0\u00a0' : '');
+          piece.append(ch, tx); word.appendChild(piece);
+          if (/\s$/.test(txt)) newWord();
+        });
+      });
+      sheetEl.appendChild(ln);
+    });
+    if (!sheet.lines.length) sheetEl.innerHTML = '<p class="small">This song has no chords or lyrics yet. Add them in Library &amp; Editor (“Optional lyrics &amp; chords”).</p>';
+    this.update(false);
+  },
+  setActive(on) {
+    if (!on && this.active) keyboard.set('target', []);
+    this.active = on; this.highlightKeys();
+  },
+  start(idx = 0) {
+    audio.ensure();
+    if (!this.engine || !this.seq.length) { $('lFeedback').textContent = 'This song has no chords to follow.'; return; }
+    this.running = true; this.feedback = ''; this.engine.matched = 0;
+    this.engine.goto(idx);
+  },
+  stop() { this.running = false; this.feedback = ''; this.update(false); },
+  next() { if (!this.engine) return; if (!this.running) return this.start(Math.min(this.engine.index + 1, this.seq.length - 1)); this.feedback = ''; this.engine.next(); },
+  back() { if (!this.engine) return; if (!this.running) return this.start(Math.max(this.engine.index - 1, 0)); this.feedback = ''; this.engine.back(); },
+  restart() { if (!this.engine) return; if (!this.running) return this.start(0); this.feedback = ''; this.engine.restart(); },
+  noteOn(n, t) {
+    if (!this.engine) return;
+    if (this.running && this.active) this.engine.noteOn(n, t); else this.engine.held.add(n);
+  },
+  noteOff(n) { if (this.engine) this.engine.noteOff(n); },
+  onEvent(e) {
+    if (!this.running) { return; }
+    if (e.type === 'advance') { this.feedback = `<span class="ok">✔ ${escapeHtml(fmtChord(e.played.symbol).text)}</span>`; audio.ensure(); }
+    if (e.type === 'partial') {
+      if (this.engine.struck.size < 3) return; // only comment once a real attempt (3+ new keys) was made
+      const names = chordToneNames(this.engine.current.parsed, currentSong()?.key);
+      const missing = e.missing.map((pc) => names.find((n) => parsePitchClass(n) === pc) || ROOT_NAMES[pc]);
+      this.feedback = `<span class="warn">Not yet: missing ${escapeHtml(missing.join(', '))}</span>`;
+      this.update(false); return;
+    }
+    if (e.type === 'finished') this.feedback = '<span class="ok">🎉 End of the song. Press Restart to go again.</span>';
+    this.update(true);
+  },
+  /** Refresh highlights, the big display panel and the keyboard/staff targets. */
+  update(scroll = true) {
+    const eng = this.engine, idx = eng ? eng.index : 0, cur = this.running && eng ? eng.current : null;
+    this.chordEls.forEach((el, i) => {
+      if (!el) return;
+      el.classList.toggle('current', !!cur && i === idx);
+      el.classList.toggle('done', this.running && i < idx);
+    });
+    $('lSheet').querySelectorAll('.lline.currentline').forEach((x) => x.classList.remove('currentline'));
+    const curEl = cur ? this.chordEls[idx] : null;
+    if (curEl) {
+      curEl.closest('.lline').classList.add('currentline');
+      if (scroll) {
+        const box = $('lSheet'), r = curEl.getBoundingClientRect(), br = box.getBoundingClientRect();
+        if (r.top < br.top + 10 || r.bottom > br.bottom - 10) box.scrollTo({ top: box.scrollTop + r.top - br.top - box.clientHeight / 3, behavior: 'smooth' });
+      }
+    }
+    const s = currentSong();
+    const sec = cur ? [...this.sheet.lines.slice(0, cur.line)].reverse().find((l) => l.type === 'section') : null;
+    $('lContext').textContent = cur ? `Chord ${idx + 1} of ${this.seq.length}${sec ? ' · ' + sec.label : ''}` : (s ? s.title : '');
+    if (cur) {
+      $('lTarget').textContent = cur.text.trim() ? '“' + cur.text.trim() + '”' : '\u00a0';
+      $('lSymbol').innerHTML = chordHtml(cur.symbol);
+      $('lTones').textContent = 'Notes: ' + chordToneNames(cur.parsed, s?.key).join(' – ') + ' · any inversion or voicing';
+      const up = this.seq.slice(idx + 1, idx + 4).map((x) => fmtChord(x.symbol).text);
+      $('lUpcoming').textContent = up.length ? 'then: ' + up.join(' → ') : 'last chord';
+    } else {
+      const done = this.running && eng && eng.done;
+      $('lTarget').textContent = done ? 'Finished' : this.seq.length ? 'Press Follow along' : 'No chords';
+      $('lSymbol').innerHTML = !done && this.seq.length ? chordHtml(this.seq[0].symbol) : '';
+      $('lTones').textContent = !done && this.seq.length ? 'First chord. Play it when the song starts.' : '';
+      $('lUpcoming').textContent = '';
+    }
+    $('lFeedback').innerHTML = this.feedback || (cur ? 'Play it!' : '');
+    $('lStart').textContent = this.running ? '▶ Following…' : '▶ Follow along';
+    this.highlightKeys();
+  },
+  /** Target notes of the current chord on the keyboard (and thereby on the live staff). */
+  highlightKeys() {
+    if (!this.active) return;
+    const cur = this.running && this.engine ? this.engine.current : null;
+    keyboard.set('target', cur && $('lHints').checked ? targetVoicing(cur.parsed) : []);
+  },
+};
+$('lStart').onclick = () => lyricsView.start(lyricsView.engine && !lyricsView.engine.done ? lyricsView.engine.index : 0);
+$('lStop').onclick = () => lyricsView.stop();
+$('lNext').onclick = () => lyricsView.next();
+$('lBack').onclick = () => lyricsView.back();
+$('lRestart').onclick = () => lyricsView.restart();
+$('lHints').onchange = () => lyricsView.highlightKeys();
+
 // ---------------- library ----------------
 const library = {
   renderList() {
@@ -376,7 +563,7 @@ const library = {
       const li = document.createElement('li');
       li.innerHTML = `<b></b><span class="small"></span>`;
       li.firstChild.textContent = s.title;
-      li.lastChild.textContent = ` ${s.key} · ${s.timeSignature}${s.placeholder ? ' · placeholder' : ''}${s.arrangement ? ' · LH' : ''}`;
+      li.lastChild.textContent = ` ${s.key} · ${s.timeSignature}${s.placeholder ? ' · placeholder' : ''}${s.arrangement ? ' · LH' : ''}${s.lyrics ? ' · lyrics' : ''}`;
       li.classList.toggle('active', s.id === currentSongId);
       li.onclick = () => { currentSongId = s.id; settings.songId = s.id; saveSettings(); $('pSong').value = s.id; this.renderList(); editor.load(s); };
       ul.appendChild(li);
@@ -439,6 +626,8 @@ const editor = {
     $('eLH').value = s.arrangement ? eventsToText(s.arrangement.leftHand, o) : '';
     $('eRH').value = s.arrangement?.rightHand ? eventsToText(s.arrangement.rightHand, o) : '';
     $('eArrDetails').open = !!s.arrangement;
+    $('eLyrics').value = s.lyrics ? lyricsToText(s.lyrics) : '';
+    $('eLyrDetails').open = !!s.lyrics;
     this.dirty = false; $('eMsg').textContent = '';
     this.renderPreview();
   },
@@ -449,6 +638,7 @@ const editor = {
       placeholder: $('ePlaceholder').checked, source: $('eSource').value, tags: this.song?.tags || [], notes: this.song?.notes || '',
       melodyText: $('eMelody').value, chordsText: $('eChords').value,
     };
+    if ($('eLyrics').value.trim()) r.lyricsText = $('eLyrics').value;
     if ($('eLH').value.trim() || $('eRH').value.trim()) {
       r.arrangement = { style: this.song?.arrangement?.style || 'manual' };
       if ($('eLH').value.trim()) r.arrangement.leftHandText = $('eLH').value;
@@ -460,7 +650,7 @@ const editor = {
     const { song, errors, warnings } = normalizeSong(this.raw());
     $('eProblems').innerHTML = [...errors.map((e) => '❌ ' + e), ...warnings.map((w) => '⚠️ ' + w)].map((m) => `<div>${escapeHtml(m)}</div>`).join('');
     if (song) eScore.render({ key: song.key, timeSignature: song.timeSignature, pickupBeats: song.pickupBeats, totalBeats: song.totalBeats,
-      rh: song.arrangement?.rightHand || song.melody, lh: song.arrangement?.leftHand || [], chords: song.chords, showLyrics: true });
+      rh: song.arrangement?.rightHand || song.melody, lh: song.arrangement?.leftHand || [], chords: song.chords, showLyrics: true, chordLabel });
     return { song, errors };
   },
   async save() {
@@ -471,7 +661,7 @@ const editor = {
   },
 };
 let previewTimer = 0;
-['eTitle', 'eComposer', 'eKey', 'eTime', 'eTempo', 'ePickup', 'ePlaceholder', 'eSource', 'eMelody', 'eChords', 'eLH', 'eRH'].forEach((id) =>
+['eTitle', 'eComposer', 'eKey', 'eTime', 'eTempo', 'ePickup', 'ePlaceholder', 'eSource', 'eMelody', 'eChords', 'eLH', 'eRH', 'eLyrics'].forEach((id) =>
   $(id).addEventListener('input', () => { editor.dirty = true; $('eMsg').textContent = 'unsaved changes'; clearTimeout(previewTimer); previewTimer = setTimeout(() => editor.renderPreview(), 300); }));
 $('eSave').onclick = () => editor.save();
 $('eRevert').onclick = () => editor.load(currentSong());
@@ -584,7 +774,7 @@ const trainer = {
     this.mistakes = 0; this.startT = now(); this.needNew = hub.heldNotes().length > 0; this.reported = false;
     $('tContext').textContent = it.context || `Drill ${this.idx + 1} of ${this.items.length}`;
     $('tTarget').textContent = it.label;
-    $('tSymbol').textContent = it.requireInversion ? it.slash : it.symbol;
+    this.showSymbol(it);
     $('tTones').textContent = $('tHint').checked ? `Notes: ${it.toneNames.join(' – ')}` + (it.requireInversion ? ` · lowest note: ${ROOT_NAMES[it.bassPc]}` : '') : '';
     keyboard.set('hint', $('tHint').checked ? it.hint : []);
     keyboard.set('good', []);
@@ -593,6 +783,7 @@ const trainer = {
     clearTimeout(this.timer);
     if ($('tTimed').checked) this.timer = setTimeout(() => { if (this.running && this.items[this.idx] === it) { this.mistakes++; $('tFeedback').textContent = '⏱ time! It was: ' + it.toneNames.join(' '); keyboard.set('hint', it.hint); } }, 5000);
   },
+  showSymbol(it) { $('tSymbol').innerHTML = chordHtml(it.requireInversion ? it.slash : it.symbol); },
   onNote() {
     if (!this.running || !$('tab-trainer').classList.contains('active')) return;
     const it = this.items[this.idx]; if (!it) return;
@@ -605,7 +796,7 @@ const trainer = {
       recordStat(tStats, it, sec, this.mistakes); localStorage.setItem('cfp-trainer-stats', JSON.stringify(tStats));
       this.done++; this.times.push(sec);
       if (!this.mistakes) { this.clean++; this.streak++; } else this.streak = 0;
-      fb.textContent = `✔ ${detectChords(held)[0]?.symbol || it.symbol} — ${sec.toFixed(1)}s`; fb.className = 'feedback ok';
+      fb.textContent = `✔ ${fmtChord(detectChords(held)[0]?.symbol || it.symbol, { rootLabel: true }).text} — ${sec.toFixed(1)}s`; fb.className = 'feedback ok';
       keyboard.set('good', held); audio.success();
       this.running = false;
       this.timer = setTimeout(() => { this.running = true; this.idx++; if (this.idx >= this.items.length) { this.finish(); } else this.show(); }, 700);
@@ -654,5 +845,5 @@ function slugify(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-')
   showTab(settings.tab || 'practice');
   updateLive();
   // expose for debugging / simulated MIDI from the console: cfp.sim([60,64,67])
-  window.cfp = { hub, practice, trainer, store, audio, sim(notes, ms = 400) { notes.forEach((n) => hub.noteOn(n, 90)); setTimeout(() => notes.forEach((n) => hub.noteOff(n)), ms); } };
+  window.cfp = { hub, practice, trainer, lyrics: lyricsView, keyboard, store, audio, sim(notes, ms = 400) { notes.forEach((n) => hub.noteOn(n, 90)); setTimeout(() => notes.forEach((n) => hub.noteOff(n)), ms); } };
 })();

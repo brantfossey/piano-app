@@ -3,8 +3,8 @@ const SVGNS = 'http://www.w3.org/2000/svg';
 const isBlack = (n) => [1, 3, 6, 8, 10].includes(n % 12);
 
 export class PianoKeyboard {
-  constructor(container, { low = 21, high = 108, onNoteOn = () => {}, onNoteOff = () => {} } = {}) {
-    this.container = container; this.onNoteOn = onNoteOn; this.onNoteOff = onNoteOff;
+  constructor(container, { low = 21, high = 108, onNoteOn = () => {}, onNoteOff = () => {}, onChange = () => {} } = {}) {
+    this.container = container; this.onNoteOn = onNoteOn; this.onNoteOff = onNoteOff; this.onChange = onChange;
     this.pointers = new Map();
     this.state = { played: new Set(), target: new Set(), wrong: new Set(), hint: new Set(), good: new Set() };
     this.setRange(low, high);
@@ -69,7 +69,18 @@ export class PianoKeyboard {
     if (prev != null) this.onNoteOff(prev);
     this.pointers.delete(e.pointerId);
   }
-  set(kind, notes) { this.state[kind] = new Set(notes || []); this.apply(); }
+  /** Set the notes of one highlight state. No-op if unchanged; onChange(kind) fires otherwise. */
+  set(kind, notes) {
+    const next = new Set(notes || []);
+    const prev = this.state[kind];
+    if (prev && prev.size === next.size && [...next].every((n) => prev.has(n))) return false;
+    this.state[kind] = next; this.apply(); this.onChange(kind);
+    return true;
+  }
+  /** Space-separated state classes of a note ('played target' …), shared with the staff renderer. */
+  classesOf(n) { return Object.keys(this.state).filter((k) => this.state[k].has(n)).join(' '); }
+  /** All notes that currently carry any highlight. */
+  highlighted() { return [...new Set(Object.values(this.state).flatMap((s) => [...s]))].sort((a, b) => a - b); }
   apply() {
     if (!this.keys) return;
     for (const [n, el] of this.keys) {

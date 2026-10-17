@@ -16,6 +16,18 @@ export const SEED_SONGS = [
       | D5:2"once" B4:0.5"was" G4:0.5 | B4:2"lost" A4:1"but" | G4:2"now" E4:1"am" | D4:2"found" D4:1"was"
       | G4:2"blind" B4:0.5"but" G4:0.5 | B4:2"now" A4:1"I" | G4:3"see" | G4:2 |`,
     chordsText: `| N.C. | G | G7 | C | G | G | Em | D | D7 | G | G7 | C | G | Em | D7 | G | G |`,
+    // Lyrics & Chords view: chords in [brackets] sit above the syllable where they change (John Newton, 1779, public domain).
+    lyricsText: `[Verse 1]
+A[G]mazing [G7]grace, how [C]sweet the [G]sound
+That saved a [Em]wretch like [D]me [D7]
+I [G]once was [G7]lost, but [C]now am [G]found,
+Was [Em]blind, but [D7]now I [G]see.
+
+[Verse 2]
+'Twas [G]grace that [G7]taught my [C]heart to [G]fear,
+And grace my [Em]fears re[D]lieved; [D7]
+How [G]precious [G7]did that [C]grace ap[G]pear
+The [Em]hour I [D7]first be[G]lieved.`,
   },
   {
     format: 'piano-song', version: 1,
@@ -68,5 +80,9 @@ export const SEED_SONGS = [
       | F4:3"want" F4:1"to" | A4:2"be" C5:1"in" C5 | C5:1"that" Bb4:3"num-" | r:1 A4:1"ber" Bb4"when" C5"the"
       | A4:2"saints" F4:2"go" | G4:2"march-" G4:2"ing" | F4:4"in" | r:1 |`,
     chordsText: `| N.C. | F | F | F | F | F | F | C7 | C7 | F | F7 | Bb | Bb | F | C7 | F | F |`,
+    lyricsText: `Oh when the [F]saints go marching in,
+Oh when the saints go marching [C7]in,
+Oh Lord, I [F]want to [F7]be in [Bb]that number,
+When the [F]saints go [C7]marching [F]in.`,
   },
 ];

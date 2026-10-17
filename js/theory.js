@@ -353,3 +353,36 @@ export function beatsPerMeasure(ts) {
   const t = parseTimeSignature(ts);
   return (t.num * 4) / t.den;
 }
+
+// ---------- Chord display (inversion display setting) ----------
+/** Inversion display modes: 'slash' = "A/C#", 'label' = "A" + small "1st inversion", 'base' = "A". */
+export const INVERSION_DISPLAY_MODES = {
+  slash: 'Slash (A/C#)',
+  label: 'Name + inversion (A, 1st inv.)',
+  base: 'Name only (A)',
+};
+
+/**
+ * Format a chord symbol (or a detectChords() result) for display.
+ * Returns {main, sub, text}: `main` is the big name, `sub` the small annotation (may be ''),
+ * `text` a one-line version (for status lines / tooltips).
+ * opts.rootLabel: also annotate root position in 'label' mode (live display).
+ */
+export function chordDisplay(chord, mode = 'slash', { rootLabel = false } = {}) {
+  if (!chord) return { main: '', sub: '', text: '' };
+  const symbol = typeof chord === 'string' ? chord.trim() : chord.symbol || '';
+  if (typeof chord === 'object' && (chord.single || chord.interval)) return { main: symbol, sub: '', text: symbol };
+  const p = parseChordSymbol(symbol);
+  if (!p || p.nc) return { main: symbol, sub: '', text: symbol };
+  const hasSlash = p.bassPc !== p.rootPc;
+  const base = hasSlash ? symbol.slice(0, symbol.lastIndexOf('/')) : symbol;
+  let sub = '';
+  if (hasSlash) {
+    const ivs = QUALITY_BY_ID[p.quality].iv;
+    const idx = ivs.findIndex((i) => mod12(i) === mod12(p.bassPc - p.rootPc));
+    sub = idx >= 1 && idx <= 3 && ivs[idx] < 12 ? INV_NAMES[idx] : `over ${p.bass}`;
+  } else if (rootLabel) sub = INV_NAMES[0];
+  if (mode === 'base') return { main: base, sub: '', text: base };
+  if (mode === 'label') return { main: base, sub, text: sub && (hasSlash || rootLabel) ? `${base} (${sub})` : base };
+  return { main: symbol, sub: '', text: symbol };
+}

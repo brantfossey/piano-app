@@ -26,14 +26,15 @@ export class ScoreView {
     }
   }
 
-  /** model: {key,timeSignature,pickupBeats,totalBeats,rh:[{beat,dur,pitches,lyric?}],lh:[...],chords:[{beat,symbol}]} */
+  /** model: {key,timeSignature,pickupBeats,totalBeats,rh:[{beat,dur,pitches,lyric?}],lh:[...],chords:[{beat,symbol}],
+   *  chordLabel?(symbol)->{main,sub}, noteClass?(midi)->'played target …' (same state classes as the on-screen keys)} */
   render(model) {
     this.model = model;
     const key = parseKey(model.key || 'C');
     const bpm = beatsPerMeasure(model.timeSignature || '4/4');
     const pickup = model.pickupBeats || 0;
     const total = Math.max(model.totalBeats || bpm, pickup + bpm * (this.compact ? 0 : 1));
-    const W = Math.max(320, this.container.clientWidth || 900);
+    const W = this.compact ? 280 : Math.max(320, this.container.clientWidth || 900); // compact: fixed viewBox, scaled by CSS
     const measures = [];
     if (pickup > 0) measures.push({ start: 0, len: pickup });
     for (let b = pickup; b < total - EPS; b += bpm) measures.push({ start: b, len: bpm });
@@ -106,7 +107,10 @@ export class ScoreView {
       // chord symbols
       for (const c of model.chords || []) {
         if (c.beat < rs - EPS || c.beat >= re - EPS) continue;
-        el('text', { x: X(c.beat) - 5, y: tTop - 1.6 * S, class: 'chordsym' }, g).textContent = c.symbol;
+        const lab = model.chordLabel ? model.chordLabel(c.symbol) : { main: c.symbol, sub: '' };
+        const t = el('text', { x: X(c.beat) - 5, y: tTop - 1.6 * S, class: 'chordsym' }, g);
+        t.textContent = lab.main;
+        if (lab.sub) { const sub = el('tspan', { class: 'chordsub', dx: 2 }, t); sub.textContent = lab.sub.replace(' inversion', ' inv.'); }
       }
       const measureOf = (b) => measures.findIndex((m) => b >= m.start - EPS && b < m.start + m.len - EPS);
       const drawHand = (events, hand) => {
@@ -119,7 +123,7 @@ export class ScoreView {
           byBeat.get(k).pitches.push(...e.pitches);
         }
         for (const grp of byBeat.values()) {
-          const gEl = drawGroup(g, grp, hand, X(grp.beat), hand === 'L' ? 'bass' : 'treble', tTop, bTop, key, accState, measureOf(grp.beat), !!this.compact);
+          const gEl = drawGroup(g, grp, hand, X(grp.beat), hand === 'L' ? 'bass' : 'treble', tTop, bTop, key, accState, measureOf(grp.beat), !!this.compact, model.noteClass);
           if (grp.lyric && model.showLyrics) el('text', { x: X(grp.beat), y: tTop + 4 * S + 3.4 * S, class: 'lyric' }, g).textContent = grp.lyric;
           const k = hand + '@' + Math.round(grp.beat * 1000);
           this.groups.set(k, gEl);
@@ -162,7 +166,7 @@ export class ScoreView {
 const tY = (tTop, step) => tTop + ((38 - step) * S) / 2;
 const bY = (bTop, step) => bTop + ((26 - step) * S) / 2;
 
-function drawGroup(parent, grp, hand, x, staff, tTop, bTop, key, accState, measureIdx, compact) {
+function drawGroup(parent, grp, hand, x, staff, tTop, bTop, key, accState, measureIdx, compact, noteClass) {
   const g = el('g', { class: 'notegroup hand-' + hand }, parent);
   const notes = [...new Set(grp.pitches)].sort((a, b) => a - b).map((m) => {
     const sp = spellMidi(m, key);
@@ -199,7 +203,7 @@ function drawGroup(parent, grp, hand, x, staff, tTop, bTop, key, accState, measu
     const shift = n.step - prevStep === 1 && !prevShift;
     prevShift = shift; prevStep = n.step;
     const hx = x + (shift ? (up ? 9 : -9) : 0);
-    el('ellipse', { cx: hx, cy: Y(n.step), rx: 5.2, ry: 3.8, transform: `rotate(-20 ${hx} ${Y(n.step)})`, class: 'head' + (hollow ? ' hollow' : ''), 'data-midi': n.midi }, g);
+    el('ellipse', { cx: hx, cy: Y(n.step), rx: 5.2, ry: 3.8, transform: `rotate(-20 ${hx} ${Y(n.step)})`, class: 'head' + (hollow ? ' hollow' : '') + (noteClass ? ' ' + noteClass(n.midi) : ''), 'data-midi': n.midi }, g);
     // dots
     if ([0.75, 1.5, 3, 6].some((d) => Math.abs(d - dur) < EPS)) {
       const dy = n.step % 2 === (staff === 'treble' ? 0 : 0) ? -S / 2 : 0;

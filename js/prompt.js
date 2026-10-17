@@ -12,6 +12,7 @@ Output ONLY valid JSON (no comments, no markdown). One song = one object; severa
   "pickupBeats": 1,           // length of the pickup (anacrusis) bar in quarter-note beats, 0 if none
   "melodyText": "| D4:1 | G4:2 B4:0.5 G4:0.5 | ... |",
   "chordsText": "| N.C. | G | G7 | C | G D7 | ... |",
+  "lyricsText": "[Verse 1]\nA[G]mazing [G7]grace, how [C]sweet the [G]sound\n...",   // OPTIONAL lyrics with chords
   "arrangement": {            // OPTIONAL: only if the sheet music has a written left hand / full piano part
     "leftHandText": "| r:1 | G2+D3:3 | ... |",
     "rightHandText": "| D4:1 | B3+D4+G4:2 ... |"   // optional full right hand incl. harmony notes
@@ -39,6 +40,15 @@ CHORD TEXT RULES (chordsText)
 - Symbols: C, Cm, C7, Cmaj7, Cm7, Cdim, Cdim7, Cm7b5, Caug, Csus2, Csus4, C7sus4, C6, Cm6, Cadd9, C9, Cmaj9, Cm9, C6/9, C7b9, C13, C5,
   and slash chords like G/B, C/E, D7/F#. Use the chord symbols printed on the music; if there are none, infer
   simple diatonic harmony and set "source" to say the chords were inferred.
+
+LYRICS & CHORDS (lyricsText, optional; used by the Lyrics & Chords play-along view)
+- ChordPro style: put each chord in [brackets] directly before the syllable where it changes: "A[G]mazing [G7]grace".
+  A chord at the end of a line with no words under it is fine: "like [D]me [D7]".
+- One lyric line per line (use \n inside the JSON string); an empty line between verses.
+- A line that is only "[Verse 1]", "[Chorus]", "[Bridge]" (not a chord symbol) is a section heading.
+- Same chord symbols as chordsText. Write the chords in the order they are played, repeating verses in full;
+  write a chord again only where it changes or is struck again. [N.C.] = no chord.
+- Only include lyrics that are public domain or that the user owns; otherwise leave lyricsText out.
 
 QUALITY CHECKLIST
 - Every full bar must add up to the time signature (4/4 = 4 beats, 3/4 = 3, 2/4 = 2, 6/8 = 3).

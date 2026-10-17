@@ -1,6 +1,7 @@
 // Song JSON format: parsing, validation, normalization and serialization.
 // See README.md "Song JSON format" for the human/AI-facing documentation.
 import { parsePitch, parseDuration, parseChordSymbol, beatsPerMeasure, midiToName, parseKey } from './theory.js';
+import { parseLyricsText, parseLyricsField, lyricsToText } from './lyrics.js';
 
 export const FORMAT_ID = 'piano-song';
 export const FORMAT_VERSION = 1;
@@ -195,7 +196,12 @@ export function normalizeSong(raw) {
   chords.forEach((c, i) => {
     if (c.dur == null) c.dur = round((chords[i + 1]?.beat ?? totalBeats) - c.beat);
   });
-  if (!melody.length && !(rh && rh.length)) warnings.push('song has no melody / right-hand notes');
+  // optional lyrics with inline chords (Lyrics & Chords view). Older songs simply don't have them.
+  let lyrics = null;
+  const lyr = typeof raw.lyricsText === 'string' && raw.lyricsText.trim() ? parseLyricsText(raw.lyricsText)
+    : raw.lyrics != null && raw.lyrics !== '' ? parseLyricsField(raw.lyrics) : null;
+  if (lyr) { errors.push(...lyr.errors); warnings.push(...lyr.warnings); if (lyr.lines.length) lyrics = lyr.lines; }
+  if (!melody.length && !(rh && rh.length) && !lyrics) warnings.push('song has no melody / right-hand notes');
 
   const song = {
     format: FORMAT_ID, version: FORMAT_VERSION,
@@ -211,7 +217,7 @@ export function normalizeSong(raw) {
     pickupBeats,
     swing: !!raw.swing,
     tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [],
-    melody, chords,
+    melody, chords, lyrics,
     arrangement: lh || rh ? { leftHand: lh || [], rightHand: rh || null, style: src.style || raw.arrangementStyle || 'manual' } : null,
     totalBeats,
   };
@@ -237,6 +243,7 @@ export function songToJson(song) {
     melody: song.melody.map((e) => evToJson(e, song.key)),
     chords: song.chords.map((c) => ({ beat: c.beat, dur: c.dur, symbol: c.symbol })),
   };
+  if (song.lyrics?.length) o.lyricsText = lyricsToText(song.lyrics);
   if (song.arrangement) {
     o.arrangement = { style: song.arrangement.style, leftHand: song.arrangement.leftHand.map((e) => evToJson(e, song.key)) };
     if (song.arrangement.rightHand) o.arrangement.rightHand = song.arrangement.rightHand.map((e) => evToJson(e, song.key));
