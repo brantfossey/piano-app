@@ -1,6 +1,7 @@
 // Song library persistence: IndexedDB (primary) with localStorage fallback.
 import { normalizeSong, songToJson } from './songformat.js';
 import { SEED_SONGS } from './seeds.js';
+import { isPlaceholderLyrics } from './lyrics.js';
 
 const DB = 'chord-fluency-piano', STORE = 'songs', LS_KEY = 'cfp-songs-v1';
 
@@ -67,5 +68,14 @@ export class SongStore {
       localStorage.setItem(LS_KEY, JSON.stringify(JSON.parse(localStorage.getItem(LS_KEY) || '[]').filter((x) => x.id !== id)));
     } else this.mem.delete(id);
   }
-  async restoreSeeds() { for (const s of SEED_SONGS) await this.put(normalizeSong(s).song); }
+  async restoreSeeds() {
+    const cur = await this.all();
+    for (const seed of SEED_SONGS) {
+      const song = normalizeSong(seed).song;
+      // chords-only seeds: keep lyrics the user pasted in (they live only in this browser)
+      const have = cur.find((x) => x.id === seed.id);
+      if (have?.lyrics && (seed.tags || []).includes('chords-only') && !isPlaceholderLyrics(have.lyrics)) song.lyrics = have.lyrics;
+      await this.put(song);
+    }
+  }
 }

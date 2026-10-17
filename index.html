@@ -162,6 +162,15 @@
         <summary>Optional lyrics &amp; chords (for the Lyrics &amp; Chords view)</summary>
         <label class="block">Lyrics with chords in brackets <span class="small">— <code>A[G]mazing [G7]grace, how [C]sweet the [G]sound</code>; a line <code>[Verse 2]</code> is a section heading</span>
           <textarea id="eLyrics" rows="6" spellcheck="false" placeholder="[Verse 1]&#10;A[G]mazing [G7]grace, how [C]sweet the [G]sound"></textarea></label>
+        <div class="pastesheet">
+          <label class="block">Paste chord sheet <span class="small">— copy a text chord sheet from a chords app (Ultimate Guitar, Moises…): a line of chords above each lyric line, <code>[Verse 1]</code> headers. It is converted into the format above and saved on this song <b>in this browser only</b>.</span>
+            <textarea id="ePasteSheet" rows="6" spellcheck="false" placeholder="[Verse 1]&#10;C              G&#10;Paper boats go sailing&#10;    Am7          F&#10;down the little river"></textarea></label>
+          <div class="row">
+            <button id="eConvertSheet">Convert pasted chord sheet</button>
+            <label class="small" title="e.g. Am7(#5) → Am7, Bb7sus2 → Bb7sus4"><input type="checkbox" id="eSimplify" checked> simplify unsupported chords</label>
+            <span id="eConvertMsg" class="small"></span>
+          </div>
+        </div>
       </details>
       <div class="row">
         <button id="eSave" class="primary">💾 Save</button>
@@ -234,6 +243,7 @@
       <b>Melody + chord symbols</b> is the chord-fluency mode: read the melody with your right hand and play the chord named above the staff with your left hand in <i>any</i> voicing or inversion.</p>
     <h2>Lyrics &amp; Chords</h2>
     <p>A chord sheet like Ultimate Guitar: the chords sit above the words. Press <b>Follow along</b> while the song plays in the room (the app doesn't listen to it). The first chord is highlighted; play it on the piano (any inversion or voicing, extra notes OK) and the highlight moves to the next one. Use <b>Back</b>/<b>Next</b> (or the ← → keys) if you miss one, <b>Restart</b> to start over, or click any chord to jump there. Songs without written lyrics show the melody's syllables, or just a chord chart.</p>
+    <p><b>Paste chord sheet:</b> in Library &amp; Editor → “Optional lyrics &amp; chords”, paste a text chord sheet copied from a chords app (chords on one line, the words on the line below, <code>[Verse 1]</code> headers) and press <b>Convert pasted chord sheet</b>. Each chord is placed on the syllable under it, chord-only lines (intro, solo) stay chord lines, and the result is saved on the song you are editing, in this browser only. With <b>simplify unsupported chords</b> on, chords the app doesn't know are replaced by the closest one it does (<code>Am7(#5)</code> → <code>Am7</code>, <code>Bb7sus2</code> → <code>Bb7sus4</code>). Use this to add the words to a chords-only song such as “Nothing's Gonna Change My Love For You”.</p>
     <p><b>Chord names</b> (top bar) sets how inversions are shown everywhere: slash chords (<code>A/C#</code>), the chord name with a small “1st inversion”, or just the chord name.</p>
     <h2>Arrangements</h2>
     <p>Pick a style (pop ballad, ragtime stride, gospel/hymn, country) and a left-hand pattern (block, broken, stride). The generator builds both hands from the melody and chord symbols. Save it into the song if you like it.</p>

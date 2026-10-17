@@ -31,9 +31,9 @@ python3 -m http.server 8080          # or: npx serve .   (any static file server
 ### Tests
 
 ```bash
-node --test tests/        # 39 tests: theory, chord detection, song format, lyrics, follow-along, arranger, practice engines, simulated MIDI, trainer
+node --test tests/        # 45 tests: theory, chord detection, song format, lyrics, chord-sheet paste converter, follow-along, arranger, practice engines, simulated MIDI, trainer
 # headless Chrome checks (needs a static server on :8080 and `npm i --no-save puppeteer-core`):
-node tests/browser/e2e.mjs; node tests/browser/e2e-midi.mjs; node tests/browser/e2e-lyrics.mjs
+node tests/browser/e2e.mjs; node tests/browser/e2e-midi.mjs; node tests/browser/e2e-lyrics.mjs; node tests/browser/e2e-chordsheet.mjs
 ```
 
 Every engine is pure JS with no DOM, so the tests feed it **simulated MIDI bytes** (`[0x90, note, vel]`,
@@ -54,6 +54,7 @@ highlights and the footer layout at desktop (1366×768) and Android widths (360,
 | **Arranger** | Styles: **pop ballad, ragtime stride, gospel/hymn, country**. LH patterns: **block, broken (arpeggio), stride/boom-chick** (or the style default). Voice-led LH chords, octave bass in ragtime, alternating bass and walk-ups in country/gospel, RH chord-tone fills under the melody. Can be saved into the song. |
 | **Play-along** | **Wait for me** only moves on when you play the correct notes or chord. **Steady tempo** has a metronome, count-in and scoring (perfect ≤60 ms, good ≤120 ms, ok ≤ window; hits, misses, extra notes, rushing/dragging). Parts: right hand, left hand, both, **melody + chord symbols** (LH plays the named chord in any voicing), or chord symbols only. Auto-play the other hand, keyboard hints, bar range, loop, click a bar to start there, Listen. |
 | **Lyrics & Chords** | Ultimate-Guitar-style chord sheet: chords above the words, section headings, three text sizes. **Follow along** a song playing in the room (the app doesn't listen to it): the current chord is highlighted above its word and its notes light up on the keys and the staff; play it on the piano and it moves on. Matching is tolerant: any inversion, voicing or octave, extra notes OK, broken chords OK (notes struck within 1.5 s count), the 5th of 7th chords may be left out. At least one new key must be struck, so a held chord never skips ahead. **Back / Next / Restart** buttons, ← → keys, click any chord to jump. Songs without a `lyricsText` show the melody's lyric syllables under the chords, or a plain chord chart. |
+| **Paste chord sheet** | Library & Editor → “Optional lyrics & chords”: paste a monospace chord sheet copied from a chords app (Ultimate Guitar, Moises…) and press **Convert pasted chord sheet**. See below. |
 | **Chord trainer** | Drills chords and inversions in all 12 keys. Pick chord types (maj, m, dim, aug, sus4, 7, maj7, m7, m7b5, dim7, 6) and inversions (root, 1st, 2nd, 3rd). Order can be random, circle of fifths or chromatic. **Progression drills** in all keys: I–IV–V–I (voice-led inversions), I–vi–IV–V, ii7–V7–Imaj7, I–I7–IV–iv, I–V7–I. Live MIDI feedback tells you about missing or extra notes and wrong inversions. Optional 5-second limit, streaks, and stats per chord type/inversion and per root (slowest first). |
 
 The 4 example songs (**Amazing Grace, Ode to Joy, The Entertainer opening, When the Saints**; Amazing Grace and
@@ -170,6 +171,33 @@ Oh when the [F]saints go marching [C7]in
 * Array form (also accepted): `"lyrics": ["[Verse 1]", "A[G]mazing [G7]grace", "", {"section": "Chorus"},
   {"segments": [{"chord": "F", "text": "Oh when the saints "}, {"chord": "C7", "text": "in"}]}]`. The app exports `lyricsText`.
 * Example: `songs/example-lyrics-chords.json`.
+
+### Paste chord sheet (converter)
+
+Chord apps show a sheet in monospace: a line of chords, the lyric line beneath it, section headers like `[Verse 1]`.
+Paste that text into **Paste chord sheet** (Library & Editor → “Optional lyrics & chords”) and press
+**Convert pasted chord sheet**. `convertChordSheet()` in `js/lyrics.js` (pure, unit-tested in `tests/chordsheet.test.js`):
+
+```
+[Verse 1]                         [Verse 1]
+C              G            →     [C]Paper boats go [G]sailing
+Paper boats go sailing            down [Am7]the little r[Bb7sus4]iver
+    Am7          Bb7sus2
+down the little river             (made-up sample)
+```
+
+* A line whose tokens are all chord symbols (plus `|`, `x2`, `%`, `N.C.`…) is a **chord line**; it's merged into the lyric
+  line below it, each chord inserted at its **character column** (a chord over a space moves onto the word starting right
+  after it). A chord line with no lyric line under it (Intro, Solo, a `Intro: Am F` line) stays a chord-only line.
+* `[Section]` lines (and `Chorus:` style labels) are kept as headings; blank lines collapse; tabs are expanded;
+  Ultimate Guitar `[ch]…[/ch]` markup is stripped.
+* **Simplify unsupported chords** (on by default) replaces chord types the app doesn't know with the closest one it does:
+  `Am7(#5)` → `Am7`, `Bb7sus2` → `Bb7sus4`, `Cmaj7#11` → `Cmaj7`, `Dm11` → `Dm7`, `G9sus4` → `G7sus4`. With it off, unknown
+  chords stay as written (shown as text, with a warning). The status line lists every replacement.
+* The result replaces the song's lyrics field and is **saved on the song you're editing, in this browser only (IndexedDB)**.
+  It replaces chords-only placeholders such as the preloaded *Nothing's Gonna Change My Love For You* (whose lyric slots are
+  `_`) without asking; real lyrics already in the song are only replaced after a confirmation. *Restore examples* keeps
+  words pasted into a chords-only example. Copyrighted lyrics are never part of this repository — export a backup if you need one.
 
 ### Array form (equivalent, used by the app's export)
 

@@ -229,3 +229,158 @@ export class FollowAlong {
   back() { this.goto(this.index - 1); }
   restart() { this.matched = 0; this.goto(0); }
 }
+
+// ---------------- "Paste chord sheet" importer ----------------
+// Monospace chord sheets as copied from chord apps (Ultimate Guitar, Moises, ...): a line of chords with the lyric line
+// beneath it, chords placed at the column of the syllable they belong to, and "[Verse 1]" section headers.
+
+// chord-ish token: root, quality made of known chord words/digits/accidentals, optional slash bass
+const CHORDISH = /^[A-G][#b♯♭]?(?:maj|min|dim|aug|sus|add|alt|omit|no|m|M|[0-9#b♯♭+°øΔ()\-,])*(?:\/[A-G][#b♯♭]?)?$/;
+// tokens allowed on a chord line that are not chords (bar lines, repeat marks, ...)
+const ANNOTATION = /^(?:\|+|:?\|\|?:?|x\d+|\(x\d+\)|\d+x|\(\d+x\)|-+|%|\/+|\.{2,}|\*+|\(|\))$/i;
+const SECTION_WORDS = 'intro|verse|chorus|pre-?chorus|bridge|outro|solo|interlude|instrumental|refrain|hook|tag|coda|ending|break|post-?chorus|riff';
+// quality replacements for chord types the app does not know (simplify option); first match wins
+const SIMPLIFY_QUALITY = [
+  [/^7sus2$/, '7sus4'], [/^9sus4?$/, '7sus4'], [/^13sus4?$/, '7sus4'], [/^11$/, '7sus4'], [/^sus2sus4$|^sus24$/, 'sus4'],
+  [/^m11$|^m13$|^min11$|^-11$/, 'm7'], [/^maj11$|^maj13$|^M13$/, 'maj9'], [/^6add9$|^69$/, '6/9'], [/^m69$|^m6\/9$/, 'm6'],
+  [/^m7#5$/, 'm7'], [/^maj7#5$/, 'maj7'], [/^add11$|^add4$/, ''], [/^madd11$|^madd4$|^m\(add11\)$/, 'm'],
+];
+
+function cleanToken(t) {
+  let s = t.replace(/♯/g, '#').replace(/♭/g, 'b');
+  if (/^\[[^\]]+\]$/.test(s)) s = s.slice(1, -1); // "[Am]" -> "Am"
+  if (/^\(.*\)$/.test(s) && !/^\([^)]*\)[^)]+/.test(s)) s = s.slice(1, -1); // "(Am)" -> "Am"
+  return s;
+}
+
+/**
+ * Make a chord symbol the app understands. Returns {symbol, replaced:boolean} or null when it can't be read at all.
+ * Tries: as written; known replacements (Bb7sus2 -> Bb7sus4); dropping "(...)" alterations (Am7(#5) -> Am7);
+ * finally trimming the quality from the right (Cmaj7#11 -> Cmaj7). Slash basses are kept.
+ */
+export function simplifyChordSymbol(sym) {
+  const s = cleanToken(String(sym || '').trim());
+  if (parseChordSymbol(s)) return { symbol: s, replaced: false };
+  const m = /^([A-G][#b]?)(.*?)(\/[A-G][#b]?)?$/.exec(s);
+  if (!m) return null;
+  const [, root, qual, bass = ''] = m;
+  const ok = (q) => (parseChordSymbol(root + q + bass) ? root + q + bass : (parseChordSymbol(root + q) ? root + q : null));
+  const cands = [];
+  for (const [re, rep] of SIMPLIFY_QUALITY) if (re.test(qual)) cands.push(rep);
+  const noParen = qual.replace(/\([^)]*\)/g, '');
+  cands.push(noParen);
+  for (const [re, rep] of SIMPLIFY_QUALITY) if (re.test(noParen)) cands.push(rep);
+  for (let i = noParen.length - 1; i >= 0; i--) cands.push(noParen.slice(0, i));
+  for (const q of cands) { const r = ok(q); if (r) return { symbol: r, replaced: true }; }
+  return null;
+}
+
+function tokenize(line) {
+  const out = []; const re = /\S+/g; let m;
+  while ((m = re.exec(line))) out.push({ text: m[0], col: m.index });
+  return out;
+}
+
+function isChordToken(t) {
+  const s = cleanToken(t);
+  return /^(n\.?c\.?)$/i.test(s) || (CHORDISH.test(s) && !!simplifyChordSymbol(s));
+}
+
+/** Classify one (tab-expanded, tag-stripped) line: chords | section | blank | lyric. */
+export function classifySheetLine(line) {
+  if (!line.trim()) return { kind: 'blank' };
+  const sec = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+  if (sec && !parseChordSymbol(sec[1].trim())) return { kind: 'section', label: sec[1].trim() };
+  const lab = new RegExp(`^\\s*\\(?((?:${SECTION_WORDS})(?:\\s*\\d+)?(?:\\s*\\([^)]*\\))?)\\)?\\s*:?\\s*(.*)$`, 'i').exec(line);
+  if (lab && (/:/.test(line) || !lab[2].trim() || /^\s*\(/.test(line))) {
+    const rest = lab[2];
+    if (!rest.trim()) return { kind: 'section', label: lab[1].trim() };
+    const offset = line.length - rest.length;
+    const sub = classifySheetLine(' '.repeat(offset) + rest);
+    if (sub.kind === 'chords') return { kind: 'chords', label: lab[1].trim(), tokens: sub.tokens };
+  }
+  const toks = tokenize(line);
+  let chords = 0, other = 0;
+  for (const t of toks) { if (isChordToken(t.text)) chords++; else if (!ANNOTATION.test(t.text)) other++; }
+  if (chords && !other) return { kind: 'chords', tokens: toks };
+  return { kind: 'lyric' };
+}
+
+/**
+ * Convert a pasted monospace chord sheet into lyricsText (inline [Chord] before the syllable).
+ * Options: simplify (default true) replaces chord types the app doesn't know with the closest one it does;
+ * tabWidth (default 4) for tab characters.
+ * Returns {text, replaced:[{from,to,count}], unknown:[symbols kept as written], stats:{chordLines,lyricLines,sections}}.
+ */
+export function convertChordSheet(input, { simplify = true, tabWidth = 4 } = {}) {
+  const src = String(input ?? '').replace(/\r\n?/g, '\n')
+    .replace(/\[\/?(?:ch|tab)\]/gi, '') // Ultimate Guitar markup, if copied from the source view
+    .replace(/\u00a0/g, ' ')
+    .split('\n').map((l) => {
+      let out = '';
+      for (const ch of l) out += ch === '\t' ? ' '.repeat(tabWidth - (out.length % tabWidth)) : ch;
+      return out.replace(/\s+$/, '');
+    });
+  const replacedMap = new Map(), unknown = new Set();
+  const stats = { chordLines: 0, lyricLines: 0, sections: 0 };
+  const sym = (raw) => {
+    const t = cleanToken(raw);
+    if (/^(n\.?c\.?)$/i.test(t)) return 'N.C.';
+    if (parseChordSymbol(t)) return t;
+    if (simplify) {
+      const r = simplifyChordSymbol(t);
+      if (r) { const k = t + '\u0000' + r.symbol; const e = replacedMap.get(k) || { from: t, to: r.symbol, count: 0 }; e.count++; replacedMap.set(k, e); return r.symbol; }
+    }
+    unknown.add(t); return t;
+  };
+  const out = [];
+  const pushBlank = () => { if (out.length && out[out.length - 1] !== '') out.push(''); };
+  const chordOnly = (tokens) => tokens.map((t) => (ANNOTATION.test(t.text) ? (/^\|+$|^:?\|\|?:?$/.test(t.text) ? null : t.text) : `[${sym(t.text)}]`))
+    .filter(Boolean).join(' ');
+  const cls = src.map(classifySheetLine);
+  for (let i = 0; i < src.length; i++) {
+    const c = cls[i];
+    if (c.kind === 'blank') { pushBlank(); continue; }
+    if (c.kind === 'section') { pushBlank(); out.push(`[${c.label}]`); stats.sections++; continue; }
+    if (c.kind === 'lyric') { out.push(src[i].trim()); stats.lyricLines++; continue; }
+    // chord line
+    stats.chordLines++;
+    if (c.label) { pushBlank(); out.push(`[${c.label}]`); stats.sections++; }
+    const next = cls[i + 1];
+    if (c.label || !next || next.kind !== 'lyric') { out.push(chordOnly(c.tokens)); continue; }
+    out.push(mergeChordsIntoLyric(c.tokens.filter((t) => !ANNOTATION.test(t.text)), src[i + 1], sym));
+    stats.lyricLines++; i++;
+  }
+  while (out.length && out[out.length - 1] === '') out.pop();
+  return { text: out.join('\n'), replaced: [...replacedMap.values()], unknown: [...unknown], stats };
+}
+
+// Insert [Chord] into the lyric line at the column of each chord (a chord over a space moves onto the next word
+// when that word starts within 2 columns, or anywhere in the leading indent). Chords past the end go after the text.
+function mergeChordsIntoLyric(tokens, lyric, sym) {
+  const firstChar = lyric.search(/\S/);
+  const places = tokens.map((t, k) => {
+    let col = t.col;
+    const nextCol = k + 1 < tokens.length ? tokens[k + 1].col : Infinity;
+    if (col < firstChar) col = Math.min(firstChar, nextCol > firstChar ? firstChar : col);
+    else if (col < lyric.length && lyric[col] === ' ') {
+      const j = lyric.slice(col).search(/\S/);
+      if (j > 0 && j <= 2 && col + j < nextCol) col += j;
+    }
+    return { col: Math.min(col, lyric.length), chord: sym(t.text), end: col >= lyric.length };
+  });
+  let s = '', pos = 0;
+  for (const p of places) {
+    s += lyric.slice(pos, p.col); pos = p.col;
+    if (p.end && s && !/\s$/.test(s)) s += ' ';
+    s += `[${p.chord}]`;
+  }
+  s += lyric.slice(pos);
+  return s.replace(/^\s+/, '').replace(/\s+$/, '');
+}
+
+/** True when lyricsText/lines hold chords only: no real words, just "_" slots, spaces and section headers. */
+export function isPlaceholderLyrics(textOrLines) {
+  const lines = typeof textOrLines === 'string' ? parseLyricsText(textOrLines).lines : (textOrLines || []);
+  return !lines.some((l) => l.type === 'line' && l.segs.some((s) => /[\p{L}\p{N}]/u.test(s.text)));
+}

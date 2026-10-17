@@ -6,7 +6,7 @@ import { ScoreView } from './staff.js';
 import { SongStore } from './storage.js';
 function setMidiStatus(msg) { const el = document.getElementById('midiStatus'); el.textContent = msg; el.title = msg; }
 import { detectChords, midiToName, spellMidi, parseChordSymbol, voiceChord, beatsPerMeasure, QUALITY_BY_ID, ROOT_NAMES, parseDuration, parsePitchClass, chordDisplay, INVERSION_DISPLAY_MODES } from './theory.js';
-import { songSheet, followSequence, FollowAlong, targetVoicing, chordToneNames, lyricsToText } from './lyrics.js';
+import { songSheet, followSequence, FollowAlong, targetVoicing, chordToneNames, lyricsToText, convertChordSheet, isPlaceholderLyrics } from './lyrics.js';
 import { normalizeSong, songToJson, eventsToText, chordsToText, parseImport, exportBundle, parseNoteText, measureStarts } from './songformat.js';
 import { generateArrangement, STYLES, LH_PATTERNS } from './arranger.js';
 import { buildTargets, buildSteps, WaitEngine, SteadyEngine, HAND_MODES } from './practice.js';
@@ -434,7 +434,7 @@ const lyricsView = {
     this.engine.index = keep;
     $('lSource').textContent = sheet.derived
       ? (sheet.hasWords ? 'No lyrics field in this song: showing the melody’s syllables.' : 'No lyrics in this song: showing the chord chart.')
-      : `${s.key} · ${seq.length} chords`;
+      : `${s.key} · ${seq.length} chords` + (isPlaceholderLyrics(sheet.lines) ? ' · chords only — paste your chord sheet in Library & Editor to add the words' : '');
     // DOM: lines of words; every word is a non-breaking group of [chord over text] pieces
     sheetEl.innerHTML = '';
     this.chordEls = [];
@@ -665,6 +665,23 @@ let previewTimer = 0;
 ['eTitle', 'eComposer', 'eKey', 'eTime', 'eTempo', 'ePickup', 'ePlaceholder', 'eSource', 'eMelody', 'eChords', 'eLH', 'eRH', 'eLyrics'].forEach((id) =>
   $(id).addEventListener('input', () => { editor.dirty = true; $('eMsg').textContent = 'unsaved changes'; clearTimeout(previewTimer); previewTimer = setTimeout(() => editor.renderPreview(), 300); }));
 $('eSave').onclick = () => editor.save();
+// "Paste chord sheet": convert a monospace chord sheet into lyricsText and save it on this song (IndexedDB, this browser only)
+$('eConvertSheet').onclick = async () => {
+  const msg = $('eConvertMsg');
+  const pasted = $('ePasteSheet').value;
+  if (!pasted.trim()) { msg.textContent = 'Paste a chord sheet into the box first.'; return; }
+  const r = convertChordSheet(pasted, { simplify: $('eSimplify').checked });
+  if (!r.text.trim() || !r.stats.chordLines) { msg.textContent = 'No chord lines found in the pasted text.'; return; }
+  const cur = $('eLyrics').value;
+  if (cur.trim() && !isPlaceholderLyrics(cur) && cur.trim() !== r.text.trim() && !confirm('Replace the lyrics & chords already in this song?')) return;
+  $('eLyrics').value = r.text;
+  $('eLyrDetails').open = true;
+  await editor.save();
+  const parts = [`Converted ${r.stats.chordLines} chord line(s), ${r.stats.lyricLines} lyric line(s)` + (editor.dirty ? ' — fix the errors, then Save.' : ' and saved in this browser.')];
+  if (r.replaced.length) parts.push('Simplified: ' + r.replaced.map((x) => `${x.from} → ${x.to}`).join(', ') + '.');
+  if (r.unknown.length) parts.push('Not recognised (kept as text): ' + r.unknown.join(', ') + '.');
+  msg.textContent = parts.join(' ');
+};
 $('eRevert').onclick = () => editor.load(currentSong());
 $('ePractice').onclick = async () => { if (editor.dirty) await editor.save(); $('pSong').value = currentSongId; showTab('practice'); };
 $('eShowJson').onclick = () => {
