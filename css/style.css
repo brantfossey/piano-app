@@ -177,3 +177,9 @@ select { max-width: 100%; }
 .topbar .midi-controls input[type=range] { width: 70px; }
 .topbar .midi-controls .status { flex: 1 1 0; min-width: 0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 820px) { .topbar { overflow-x: auto; } .topbar .midi-controls { overflow: visible; } }
+
+/* Lyrics & Chords: no big chord card; the highlighted chord in the sheet is the cue */
+#tab-lyrics .follow-display { padding: 4px 12px; min-height: 0; display: flex; gap: 12px; align-items: baseline; }
+#tab-lyrics .follow-display #lTarget, #tab-lyrics .follow-display #lSymbol, #tab-lyrics .follow-display #lTones, #tab-lyrics .follow-display #lUpcoming { display: none; }
+#tab-lyrics .follow-display .feedback { margin: 0; font-size: 14px; }
+#tab-lyrics .lyricsheet { max-height: calc(100vh - 430px); min-height: 220px; }
