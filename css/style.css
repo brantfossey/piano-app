@@ -167,3 +167,13 @@ select { max-width: 100%; }
 .lc.current { background: var(--target); color: #fff; padding: 0 .3em; box-shadow: 0 0 0 2px var(--target-light); }
 .lt { white-space: pre; }
 .trainer-display .symbol .invsub { font-size: 15px; }
+
+/* Compact single-row top bar: never grows taller when MIDI connects */
+.topbar { flex-wrap: nowrap; padding: 4px 10px; gap: 8px; }
+.topbar .brand { font-size: 15px; white-space: nowrap; }
+.topbar .midi-controls { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; overflow: hidden; font-size: 12px; }
+.topbar .midi-controls label { white-space: nowrap; }
+.topbar .midi-controls select { max-width: 130px; }
+.topbar .midi-controls input[type=range] { width: 70px; }
+.topbar .midi-controls .status { flex: 1 1 0; min-width: 0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 820px) { .topbar { overflow-x: auto; } .topbar .midi-controls { overflow: visible; } }

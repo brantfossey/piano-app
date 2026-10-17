@@ -4,6 +4,7 @@ import { AudioEngine } from './audio.js';
 import { PianoKeyboard } from './keyboard.js';
 import { ScoreView } from './staff.js';
 import { SongStore } from './storage.js';
+function setMidiStatus(msg) { const el = document.getElementById('midiStatus'); el.textContent = msg; el.title = msg; }
 import { detectChords, midiToName, spellMidi, parseChordSymbol, voiceChord, beatsPerMeasure, QUALITY_BY_ID, ROOT_NAMES, parseDuration, parsePitchClass, chordDisplay, INVERSION_DISPLAY_MODES } from './theory.js';
 import { songSheet, followSequence, FollowAlong, targetVoicing, chordToneNames, lyricsToText } from './lyrics.js';
 import { normalizeSong, songToJson, eventsToText, chordsToText, parseImport, exportBundle, parseNoteText, measureStarts } from './songformat.js';
@@ -133,9 +134,9 @@ function refreshDevices() {
   if (pick && hub.input?.id !== pick.id) hub.selectInput(pick.id);
   iSel.value = hub.input?.id || '';
   if (keepO && outs.find((o) => o.id === keepO)) { hub.selectOutput(keepO); oSel.value = keepO; audio.midiOut = hub.output; audio.useMidiOut = true; }
-  $('midiStatus').textContent = hub.input ? `Listening: ${hub.input.name}` : 'No MIDI input selected';
+  setMidiStatus(hub.input ? `Listening: ${hub.input.name}` : 'No MIDI input selected');
 }
-$('midiInput').onchange = (e) => { hub.selectInput(e.target.value); settings.midiIn = e.target.value; saveSettings(); $('midiStatus').textContent = hub.input ? `Listening: ${hub.input.name}` : 'No MIDI input selected'; };
+$('midiInput').onchange = (e) => { hub.selectInput(e.target.value); settings.midiIn = e.target.value; saveSettings(); setMidiStatus(hub.input ? `Listening: ${hub.input.name}` : 'No MIDI input selected'); };
 $('midiOutput').onchange = (e) => {
   hub.selectOutput(e.target.value); settings.midiOut = e.target.value; saveSettings();
   audio.midiOut = hub.output; audio.useMidiOut = !!hub.output;
