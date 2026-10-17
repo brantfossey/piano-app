@@ -31,6 +31,12 @@ export class SongStore {
       }
     }
     this.flag('seed-lyrics-v1', true);
+    if (!this.flag('seed-ngcmlfy-v1')) {
+      const seed = SEED_SONGS.find((x) => x.id === 'nothings-gonna-change-my-love-for-you');
+      const cur = await this.all();
+      if (seed && !cur.find((x) => x.id === seed.id)) await this.put(normalizeSong(seed).song);
+      this.flag('seed-ngcmlfy-v1', true);
+    }
   }
   flag(k, v) {
     if (typeof localStorage === 'undefined') return v;
